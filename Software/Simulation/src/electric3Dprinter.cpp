@@ -274,6 +274,15 @@ inline double Sigmoid(const double a, const double sigmoidOffset, const double s
 	return 1.0 - exp(sigmoidMultiplier*(a - sigmoidOffset))/(exp(sigmoidMultiplier*(a - sigmoidOffset)) + 1.0);
 }
 
+// Empirical relationship between radius and voltage.  See the spreadsheet:
+//
+// diameter-vs-voltage.ods
+
+double RadiusToVoltage(double r)
+{
+	return -0.0019*r*r*r + 0.3766*r*r - 11.7326*r + 101.023;
+}
+
 
 // Threshold the charges.  Note - this INVERTS the charges - high gives 0; low gives 1.
 // The assumption is that we have a solid material that is made more liquid the greater
@@ -444,25 +453,34 @@ void BoundaryConditions(const int b, const int z, const double v)
 	Initialise();
 	FindBoundary();
 
-	// Sources and sinks
+	double halfDiagonal = 19.0;
+	double angle = 2.0*M_PI*(double)b/(double)boundaryCount;
+	if(angle > 0.5*M_PI)
+		angle = M_PI - angle;
+	double radius = halfDiagonal*sin(M_PI*0.25)/sin(M_PI*0.75 - angle); // Triangle sine rule
+	double voltage = RadiusToVoltage(radius);
 
-//	source[0][0] = xc + round((double)(radius - 1)*cos(angle));
-//	source[0][1] = yc + round((double)(radius - 1)*sin(angle));
-//	source[1][0] = xc + round((double)(radius - 1)*cos(angle + M_PI));
-//	source[1][1] = yCentre + round((double)(radius - 1)*sin(angle + M_PI));
+	// Sources and sinks
 
 	source[0][0] = boundaryNodes[b][0];
 	source[0][1] = boundaryNodes[b][1];
-	//double angle = atan2(yCentre - source[0][1], xCentre - source[0][0]);
+
 	int opposite = (b + boundaryCount/2)%boundaryCount;
 	source[1][0] = boundaryNodes[opposite][0];
 	source[1][1] = boundaryNodes[opposite][1];
 
-//	potential[source[0][0]][source[0][1]] = 2.0 + sin(4.0*angle);
-//	potential[source[1][0]][source[1][1]] = 2.0 + sin(4.0*angle + M_PI);
+	potential[source[0][0]][source[0][1]][z] = voltage;
+	potential[source[1][0]][source[1][1]][z] = -voltage;
 
-	potential[source[0][0]][source[0][1]][z] = v;
-	potential[source[1][0]][source[1][1]][z] = -v;
+
+
+	//double angle = atan2(yCentre - source[0][1], xCentre - source[0][0]);
+	//	potential[source[0][0]][source[0][1]] = 2.0 + sin(4.0*angle);
+	//	potential[source[1][0]][source[1][1]] = 2.0 + sin(4.0*angle + M_PI);
+	//	source[0][0] = xc + round((double)(radius - 1)*cos(angle));
+	//	source[0][1] = yc + round((double)(radius - 1)*sin(angle));
+	//	source[1][0] = xc + round((double)(radius - 1)*cos(angle + M_PI));
+	//	source[1][1] = yCentre + round((double)(radius - 1)*sin(angle + M_PI));
 }
 
 
@@ -692,7 +710,7 @@ void Control()
 }
 
 
-// Self-explanatory,  I hope.
+// Self-explanatory, I hope.
 
 int main()
 {
@@ -705,15 +723,15 @@ int main()
 
 	//for(int vv = 1; vv < 21; vv++)
 	//{
-	int vv = 3;
+	//int vv = 3;
 		ChargeSetUp();
-		cout << "Z for " << vv << " volts: ";
+		//cout << "Z for " << vv << " volts: ";
 		for(int z = 1; z < nodes; z++)
 		{
 			cout << z << ' ';
 			cout.flush();
 
-			double v = (double)vv;
+			double v = 1.0;
 
 			for(int angle = 0; angle < boundaryCount/2; angle++)
 			{
@@ -724,10 +742,10 @@ int main()
 		}
 		cout << endl;
 		SigmoidCharge(0.0, 50);
-		string fileName = "thresholdTensor";
-		char str[20];
-		sprintf(str,"-%d.tns",vv);
-		fileName += str;
+		string fileName = "rectangleAttempt";
+		//char str[20];
+		//sprintf(str,"-%d.tns",vv);
+		//fileName += str;
 		OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
 	//}
 
