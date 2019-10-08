@@ -458,6 +458,8 @@ void BoundaryConditions(const int b, const int z, const double v)
 	if(angle > 0.5*M_PI)
 		angle = M_PI - angle;
 	double radius = halfDiagonal*sin(M_PI*0.25)/sin(M_PI*0.75 - angle); // Triangle sine rule
+	if(z < 7 || z > 43)
+		radius = 5;
 	double voltage = RadiusToVoltage(radius);
 
 	// Sources and sinks
@@ -742,7 +744,7 @@ int main()
 		}
 		cout << endl;
 		SigmoidCharge(0.0, 50);
-		string fileName = "rectangleAttempt";
+		string fileName = "rectangleAttempt4.tns";
 		//char str[20];
 		//sprintf(str,"-%d.tns",vv);
 		//fileName += str;
