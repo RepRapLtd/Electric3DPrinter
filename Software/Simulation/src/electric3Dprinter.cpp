@@ -38,7 +38,7 @@
 
  // MSVC does not automatically expose M_PI, this should help for Windows machines
 #ifdef _WIN32
-	#define _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
 #endif
 
 #include <fstream>
@@ -433,6 +433,7 @@ void Initialise()
 {
 	// Set up the active area and initialise the solution to 0.
 
+#pragma omp parallel for
 	for (int x = 0; x <= nodes; x++)
 	{
 		int xd = x - xCentre;
