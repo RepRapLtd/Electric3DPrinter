@@ -185,7 +185,6 @@ double GaussSeidelOnePass()
 	return rms;
 }
 
-
 // Iterate the Gauss-Seidel until convergence.  Convergence is when the root-mean-square
 // of the differences between the last pass and the current one is less than the value
 // of the constant convergence.
@@ -205,7 +204,6 @@ void GausSeidelIteration()
 		cout << "No convergence!, rms: " << rms << endl;
 }
 
-
 // Compute the magnitudes of the gradient vectors in field[][][].  This is
 // the electric field, E.  Also add the values to the accumulating charge integral.
 
@@ -218,7 +216,6 @@ void GradientMagnitudes()
 		{
 			for (int z = 1; z < nodes; z++)
 			{
-
 				// At the edges use linear gradients; parabolas elsewhere
 
 				if (!inside[x + 1][y][z])
@@ -248,7 +245,6 @@ void GradientMagnitudes()
 		}
 	}
 }
-
 
 // Find and print the maximum and minimum values of the charge integral.
 
@@ -295,7 +291,6 @@ constexpr double RadiusToVoltage(double r)
 	return -0.0019 * r * r * r + 0.3766 * r * r - 11.7326 * r + 101.023;
 }
 
-
 // Threshold the charges.  Note - this INVERTS the charges - high gives 0; low gives 1.
 // The assumption is that we have a solid material that is made more liquid the greater
 // the integral of the current flowing through it
@@ -319,7 +314,6 @@ void SigmoidCharge(const double sigmoidOffset, const double sigmoidMultiplier)
 		}
 	}
 }
-
 
 // Initialise the charges at the nodes.  Set them all 0 inside and outside the active region.
 
@@ -427,7 +421,6 @@ void FindBoundary()
 		cout << "Number of boundary nodes is not a multiple of 4! " << boundaryCount << endl;
 }
 
-
 // Initialise all the tensors for potential, field etc to 0, and also
 // set up the active region.
 
@@ -458,14 +451,12 @@ void Initialise()
 	}
 }
 
-
 // Set the boundary conditions and initialise one solution with potentials applied at at z.
 // b is the index into the boundary array that decides how far round the circle voltages will
 // be applied.  v is the potential.
 
 void BoundaryConditions(const int b, const int z, const double v)
 {
-
 	Initialise();
 	FindBoundary();
 
@@ -490,8 +481,6 @@ void BoundaryConditions(const int b, const int z, const double v)
 	potential[source[0][0]][source[0][1]][z] = voltage;
 	potential[source[1][0]][source[1][1]][z] = -voltage;
 
-
-
 	//double angle = atan2(yCentre - source[0][1], xCentre - source[0][0]);
 	//	potential[source[0][0]][source[0][1]] = 2.0 + sin(4.0*angle);
 	//	potential[source[1][0]][source[1][1]] = 2.0 + sin(4.0*angle + M_PI);
@@ -500,7 +489,6 @@ void BoundaryConditions(const int b, const int z, const double v)
 	//	source[1][0] = xc + round((double)(radius - 1)*cos(angle + M_PI));
 	//	source[1][1] = yCentre + round((double)(radius - 1)*sin(angle + M_PI));
 }
-
 
 // Output one disc at z for gnuplot into file fileName.  If activeR is positive, just output that
 // radius of the disc for close-ups of the middle.
@@ -563,7 +551,6 @@ void Output(const char* fileName, const double a[nodes + 2][nodes + 2][nodes + 2
 	}
 	outputFile.close();
 }
-
 
 // Output the tensor to file fileName that is the entire mesh so that a 3D iso-surface STL file
 // can be generated from it.
@@ -629,7 +616,6 @@ void OutputTensor(const char* fileName, const double a[nodes + 2][nodes + 2][nod
 	}
 	outputFile.close();
 }
-
 
 // Function to plot the boundary to test that it's properly set-up.
 // Not normally called.
@@ -727,7 +713,6 @@ void Control()
 	}
 }
 
-
 // Self-explanatory, I hope.
 
 int main()
@@ -737,9 +722,7 @@ int main()
 	//	TestBoundary();
 	//  TestCylinder(15, 10, 40);
 
-
 	BoundaryConditions(0, nodes / 2, 1.0);
-
 
 	//for(int vv = 1; vv < 21; vv++)
 	//{
