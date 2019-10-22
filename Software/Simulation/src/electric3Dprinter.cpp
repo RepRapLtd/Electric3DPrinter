@@ -302,6 +302,7 @@ constexpr double RadiusToVoltage(double r)
 
 void SigmoidCharge(const double sigmoidOffset, const double sigmoidMultiplier)
 {
+#pragma omp parallel for
 	for (int x = 1; x < nodes; x++)
 	{
 		for (int y = 1; y < nodes; y++)
@@ -324,6 +325,7 @@ void SigmoidCharge(const double sigmoidOffset, const double sigmoidMultiplier)
 
 void ChargeSetUp()
 {
+#pragma omp parallel for
 	for (int x = 0; x <= nodes; x++)
 	{
 		for (int y = 0; y <= nodes; y++)
@@ -621,13 +623,9 @@ void OutputTensor(const char* fileName, const double a[nodes + 2][nodes + 2][nod
 
 	// Blank layer
 
-	for (int y = 0; y <= nodes; y++)
+	for (int xy = 0; xy <= nodes * nodes; xy++)
 	{
-		for (int x = 0; x <= nodes; x++)
-		{
-			outputFile << ' ';
-			outputFile << minValue;
-		}
+		outputFile << ' ' << minValue;
 	}
 	outputFile.close();
 }
@@ -764,6 +762,7 @@ int main()
 	}
 	cout << endl;
 	SigmoidCharge(0.0, 50);
+
 	string fileName = "rectangleAttempt4.tns";
 	//char str[20];
 	//sprintf(str,"-%d.tns",vv);
