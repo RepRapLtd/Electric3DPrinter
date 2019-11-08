@@ -57,6 +57,10 @@ bool debug = false;
 
 const double convergence = 0.0001;
 
+// Gauss-Seidel relaxation (1.0 to turn off).
+
+double relax = 1.0;
+
 // Size of the grid
 
 const int nodes = 50;
@@ -169,7 +173,11 @@ double PDE(const int x, const int y, const int z)
 
 	// The actual PDE solution
 
-	return (vxm + vxp + vym + vyp + vzm + vzp)*oneSixth;
+	double solution = (vxm + vxp + vym + vyp + vzm + vzp)*oneSixth;
+
+	// Apply the relaxation
+
+	return relax*solution + (1.0 - relax)*lastPotential[x][y][z];
 }
 
 // Do a single pass of the Gauss-Seidel iteration.  Returns the root-mean
