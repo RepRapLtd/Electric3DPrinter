@@ -1,5 +1,5 @@
 /*
- * pde.cpp
+ * electric3Dprinter.cpp
  *
  * Solves Laplace's equation for a potential field given source and sink voltages at points on the periphery.
  *
@@ -8,13 +8,13 @@
  * The sources and sinks can be moved between several solutions and the cumulated charge moved through each pixel
  * calculated.
  *
- *  Created on: 26 Jul 2019
+ *  Created on: 26 July 2019
  *
  *      Author: Adrian Bowyer
  *              RepRap Ltd
  *              https://reprapltd.com
  *
- *     Licence: GPL
+ *      Licence: GPL
  *
  *
  * To plot the results:
@@ -40,8 +40,14 @@
 #include <fstream>
 #include <math.h>
 #include <string>
+#include <numeric>
+#include <ctime>
 
 using namespace std;
+
+// Comment this line out if you are not using OpenMP (https://www.openmp.org/) to parallelise and speed up the Gauss-Seidel PDE solution.
+
+#define PARALLEL
 
 // Set true for progress reports etc.
 
@@ -101,6 +107,23 @@ const double sigPower = 50.0;
 
 //**********************************************************************************************
 
+// For timing comparisons
+
+struct timespec diff(struct timespec start, struct timespec end)
+{
+	struct timespec temp;
+
+	if(end.tv_sec - start.tv_sec == 0)
+	{
+		temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+	} else
+	{
+		temp.tv_nsec = ((end.tv_sec - start.tv_sec)*1000000000) + end.tv_nsec - start.tv_nsec;
+	}
+
+	return temp;
+}
+
 // Solve the PDE at a single node [x][y][z]
 
 double PDE(const int x, const int y, const int z)
@@ -151,7 +174,36 @@ double PDE(const int x, const int y, const int z)
 
 // Do a single pass of the Gauss-Seidel iteration.  Returns the root-mean
 // square difference between this solution and the last, the size of which
-// is the test of convergence.
+// is the test of convergence.  This is parallelised for speed using OpenMP.
+
+#ifdef PARALLEL
+
+double GaussSeidelOnePass()
+{
+	// Distribute thread results across an array
+	double rms_x[nodes] = { 0.0 };
+#pragma omp parallel for
+	for (int x = 1; x < nodes; x++)
+	{
+		for (int y = 1; y < nodes; y++)
+		{
+			for (int z = 1; z < nodes; z++)
+			{
+				potential[x][y][z] = PDE(x, y, z);
+				double r = (potential[x][y][z] - lastPotential[x][y][z]);
+				rms_x[x] += r * r;
+				lastPotential[x][y][z] = potential[x][y][z];
+			}
+		}
+	}
+
+	// Accumulate results
+	double rms = accumulate(begin(rms_x), end(rms_x), (double)0.0);
+	rms = sqrt(rms / (double)(nodes * nodes * nodes));
+	return rms;
+}
+
+#else
 
 double GaussSeidelOnePass()
 {
@@ -172,6 +224,9 @@ double GaussSeidelOnePass()
 	rms = sqrt( rms/(double)(nodes*nodes*nodes) );
 	return rms;
 }
+
+#endif
+
 
 
 // Iterate the Gauss-Seidel until convergence.  Convergence is when the root-mean-square
@@ -716,6 +771,9 @@ void Control()
 
 int main()
 {
+	struct timespec t_start, t_end;
+	clock_gettime(CLOCK_MONOTONIC, &t_start);
+
 	//	TestBoundary();
 	//  TestCylinder(15, 10, 40);
 
@@ -744,7 +802,7 @@ int main()
 		}
 		cout << endl;
 		SigmoidCharge(0.0, 50);
-		string fileName = "rectangleAttempt4.tns";
+		string fileName = "rectangleAttemptParallel.tns";
 		//char str[20];
 		//sprintf(str,"-%d.tns",vv);
 		//fileName += str;
@@ -758,6 +816,10 @@ int main()
 //	PrintChargeRange();
 //
 //	Control();
+
+		clock_gettime(CLOCK_MONOTONIC, &t_end);
+		cout << "Execution time: " << (double)(diff(t_start, t_end).tv_nsec / 1000000000.0) << "s" << endl;
+
 }
 
 
