@@ -69,6 +69,7 @@ const int nodes = 50;
 
 const int xCentre = 25;
 const int yCentre = 25;
+const int zCentre = 25;
 const int radius = 22;
 
 // The source and sink
@@ -78,11 +79,12 @@ const int sources = 2;
 
 int source[sources][3];
 
-// List of nodes on the 2D boundary in cyclic order. These are the same for all Z.
+// List of nodes on the boundary in cyclic order and ascending z. The maximum possible
+// number, maxBoundary, is all the points on the X, Y faces.  These are the electrodes.
 
-const int maxBoundary = 4*nodes;
-int boundaryCount = 0;
-int boundaryNodes[maxBoundary][2];
+const int maxElectrodes = 4*nodes*nodes;
+int electrodeCount = 0;
+int electrodeNodes[maxElectrodes][3];
 
 // Stop Gauss-Seidel after this many iterations if there's no convergence
 
@@ -182,7 +184,7 @@ double PDE(const int x, const int y, const int z)
 
 // Do a single pass of the Gauss-Seidel iteration.  Returns the root-mean
 // square difference between this solution and the last, the size of which
-// is the test of convergence.  This is parallelised for speed using OpenMP.
+// is the test of convergence.  This is optionally parallelised for speed using OpenMP.
 
 #ifdef PARALLEL
 
@@ -343,7 +345,7 @@ inline double Sigmoid(const double a, const double sigmoidOffset, const double s
 
 double RadiusToVoltage(double r)
 {
-	return -0.0019*r*r*r + 0.3766*r*r - 11.7326*r + 101.023;
+	return r*(r*(-0.0019*r + 0.3766) - 11.7326) + 101.023;
 }
 
 
@@ -418,7 +420,7 @@ void FindBoundary()
 {
 	// Find the first quadrant
 
-	boundaryCount = 0;
+	electrodeCount = 0;
 
 	// Assume that half way up is immune from top and bottom boundary interference
 
@@ -430,49 +432,130 @@ void FindBoundary()
 		{
 			if(OnBoundary(x, y, z))
 			{
-				if(boundaryCount >= maxBoundary)
+				if(electrodeCount >= maxElectrodes)
 				{
 					cout << "Maximum boundary node count (Q0) exceeded!" << endl;
 					return;
 				}
 
-				boundaryNodes[boundaryCount][0] = x;
-				boundaryNodes[boundaryCount][1] = y;
-				boundaryCount++;
+				electrodeNodes[electrodeCount][0] = x;
+				electrodeNodes[electrodeCount][1] = y;
+				electrodeCount++;
 			}
 		}
 	}
 
 	// Copy that quadrant to the other three
 
-	int bc = boundaryCount;
+	int bc = electrodeCount;
 	for(int x = bc - 2; x >= 0; x--)
 	{
-		if(boundaryCount >= maxBoundary)
+		if(electrodeCount >= maxElectrodes)
 		{
 			cout << "Maximum boundary node count (Q1) exceeded!" << endl;
 			return;
 		}
-		boundaryNodes[boundaryCount][0] = 2*xCentre - boundaryNodes[x][0];
-		boundaryNodes[boundaryCount][1] = boundaryNodes[x][1];
-		boundaryCount++;
+		electrodeNodes[electrodeCount][0] = 2*xCentre - electrodeNodes[x][0];
+		electrodeNodes[electrodeCount][1] = electrodeNodes[x][1];
+		electrodeCount++;
 	}
 
-	bc = boundaryCount;
+	bc = electrodeCount;
 	for(int x = bc - 2; x > 0; x--)
 	{
-		if(boundaryCount >= maxBoundary)
+		if(electrodeCount >= maxElectrodes)
 		{
 			cout << "Maximum boundary node count (Q34) exceeded!" << endl;
 			return;
 		}
-		boundaryNodes[boundaryCount][0] = boundaryNodes[x][0];
-		boundaryNodes[boundaryCount][1] = 2*yCentre - boundaryNodes[x][1];
-		boundaryCount++;
+		electrodeNodes[electrodeCount][0] = electrodeNodes[x][0];
+		electrodeNodes[electrodeCount][1] = 2*yCentre - electrodeNodes[x][1];
+		electrodeCount++;
 	}
 
-	if(boundaryCount%4)
-		cout << "Number of boundary nodes is not a multiple of 4! " << boundaryCount << endl;
+	if(electrodeCount%4)
+		cout << "Number of boundary nodes is not a multiple of 4! " << electrodeCount << endl;
+}
+
+// Create an quarter of a circle radius r anticlockwise from the X axis.
+// It returns the count of the "pixels".  Horn's algorithm.
+
+int QuarterCircleDDA(int r, int circle[nodes][2])
+{
+	int x = r;
+	int y = 0;
+	int s = -r;
+	while(x >= y)
+	{
+		circle[y][0] = x;
+		circle[y][1] = y; // More confusing not to...
+		s += 2*y + 1;
+		y++;
+		if(s > 0)
+		{
+			s -= 2*x - 2;
+			x--;
+		}
+	}
+
+	int yTop = y;
+	y *= 2;
+	if(circle[yTop - 1][0] == circle[yTop - 1][1])
+	{
+		yTop--;
+		y--;
+	}
+
+	for(int c = 1; c < yTop; c++)
+	{
+		circle[y - c - 1][0] = circle[c][1];
+		circle[y - c - 1][1] = circle[c][0];
+	}
+
+	return y - 1;
+}
+
+
+// Add a circular ring of electrodes of radius r at height z.
+
+void ElectrodeRing(int r, int z)
+{
+	int circle[nodes][2];
+
+	int count = QuarterCircleDDA(r, circle);
+
+	if(count <= 1)
+	{
+		electrodeNodes[electrodeCount][0] = xCentre;
+		electrodeNodes[electrodeCount][1] = yCentre;
+		electrodeNodes[electrodeCount][2] = z;
+		electrodeCount++;
+		return;
+	}
+
+
+	for(int c = 0; c < count; c++)
+	{
+		electrodeNodes[electrodeCount][0] = xCentre + circle[c][0];
+		electrodeNodes[electrodeCount][1] = yCentre + circle[c][1];
+		electrodeNodes[electrodeCount][2] = z;
+
+		electrodeNodes[electrodeCount + count][0] = xCentre - circle[c][1];
+		electrodeNodes[electrodeCount + count][1] = yCentre + circle[c][0];
+		electrodeNodes[electrodeCount + count][2] = z;
+
+		electrodeNodes[electrodeCount + 2*count][0] = xCentre - circle[c][0];
+		electrodeNodes[electrodeCount + 2*count][1] = yCentre - circle[c][1];
+		electrodeNodes[electrodeCount + 2*count][2] = z;
+
+		electrodeNodes[electrodeCount + 3*count][0] = xCentre + circle[c][1];
+		electrodeNodes[electrodeCount + 3*count][1] = yCentre - circle[c][0];
+		electrodeNodes[electrodeCount + 3*count][2] = z;
+
+		electrodeCount++;
+	}
+
+	electrodeCount += 3*count;
 }
 
 
@@ -517,7 +600,7 @@ void BoundaryConditions(const int b, const int z, const double v)
 	FindBoundary();
 
 	double halfDiagonal = 19.0;
-	double angle = 2.0*M_PI*(double)b/(double)boundaryCount;
+	double angle = 2.0*M_PI*(double)b/(double)electrodeCount;
 	if(angle > 0.5*M_PI)
 		angle = M_PI - angle;
 	double radius = halfDiagonal*sin(M_PI*0.25)/sin(M_PI*0.75 - angle); // Triangle sine rule
@@ -527,12 +610,12 @@ void BoundaryConditions(const int b, const int z, const double v)
 
 	// Sources and sinks
 
-	source[0][0] = boundaryNodes[b][0];
-	source[0][1] = boundaryNodes[b][1];
+	source[0][0] = electrodeNodes[b][0];
+	source[0][1] = electrodeNodes[b][1];
 
-	int opposite = (b + boundaryCount/2)%boundaryCount;
-	source[1][0] = boundaryNodes[opposite][0];
-	source[1][1] = boundaryNodes[opposite][1];
+	int opposite = (b + electrodeCount/2)%electrodeCount;
+	source[1][0] = electrodeNodes[opposite][0];
+	source[1][1] = electrodeNodes[opposite][1];
 
 	potential[source[0][0]][source[0][1]][z] = voltage;
 	potential[source[1][0]][source[1][1]][z] = -voltage;
@@ -692,10 +775,10 @@ void TestBoundary()
 			inside[x][y][z] = true;
 	}
 	potential[1][1][z] = 0.5;
-	for(int x = 0; x < boundaryCount; x++)
+	for(int x = 0; x < electrodeCount; x++)
 	{
-		potential[boundaryNodes[x][0]][boundaryNodes[x][1]][z] += 1;
-		cout << x << ": (" << boundaryNodes[x][0] << ", " << boundaryNodes[x][1] << ")" << endl;
+		potential[electrodeNodes[x][0]][electrodeNodes[x][1]][z] += 1;
+		cout << x << ": (" << electrodeNodes[x][0] << ", " << electrodeNodes[x][1] << ")" << endl;
 	}
 	Output("boundary.dat", potential, -1, z);
 }
@@ -725,6 +808,38 @@ void TestCylinder(const int r, const int z0, const int z1)
 		}
 	}
 	OutputTensor("testCylinder.tns", thresholdedChargeIntegral);
+}
+
+// Test the circle DDA.  Not normally called.
+
+void TestCircle(int r)
+{
+	electrodeCount = 0;
+	ElectrodeRing(r, 0);
+	//cout << electrodeCount << endl;
+	for(int x = 0; x <= nodes; x++)
+	{
+		for(int y = 0; y <= nodes; y++)
+			potential[x][y][0] = 0.0;
+	}
+	for(int e = 0; e < electrodeCount; e++)
+	{
+		//cout << e << ' ' << electrodeNodes[e][0] - xCentre << ' ' << electrodeNodes[e][1] - yCentre << endl;
+		potential [electrodeNodes[e][0]] [electrodeNodes[e][1]] [0] += 1.0;
+	}
+
+	for(int y = nodes; y >= 0 ; y--)
+	{
+		for(int x = 0; x <= nodes; x++)
+		{
+			if(potential[x][y][0] < 0.5)
+				cout << '.';
+			else
+				cout << round(potential[x][y][0]);
+		}
+		cout << endl;
+	}
+	cout << endl;
 }
 
 // Remind the user what they can do.
@@ -779,54 +894,57 @@ void Control()
 
 int main()
 {
-	struct timespec t_start, t_end;
-	clock_gettime(CLOCK_MONOTONIC, &t_start);
 
-	//	TestBoundary();
-	//  TestCylinder(15, 10, 40);
+	TestCircle(24);
 
-
-	BoundaryConditions(0, nodes/2, 1.0);
-
-
-	//for(int vv = 1; vv < 21; vv++)
-	//{
-	//int vv = 3;
-		ChargeSetUp();
-		//cout << "Z for " << vv << " volts: ";
-		for(int z = 1; z < nodes; z++)
-		{
-			cout << z << ' ';
-			cout.flush();
-
-			double v = 1.0;
-
-			for(int angle = 0; angle < boundaryCount/2; angle++)
-			{
-				BoundaryConditions(angle, z, v);
-				GausSeidelIteration();
-				GradientMagnitudes();
-			}
-		}
-		cout << endl;
-		SigmoidCharge(0.0, 50);
-		string fileName = "rectangleAttemptParallel.tns";
-		//char str[20];
-		//sprintf(str,"-%d.tns",vv);
-		//fileName += str;
-		OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
-	//}
-
-//	Output("potential.dat", potential, -1, nodes/2);
-//	Output("field.dat", field, -1, nodes/2);
-//	Output("charge.dat", chargeIntegral, -1, nodes/2);
+//	struct timespec t_start, t_end;
+//	clock_gettime(CLOCK_MONOTONIC, &t_start);
 //
-//	PrintChargeRange();
+//	//	TestBoundary();
+//	//  TestCylinder(15, 10, 40);
 //
-//	Control();
-
-		clock_gettime(CLOCK_MONOTONIC, &t_end);
-		cout << "Execution time: " << (double)(diff(t_start, t_end).tv_nsec / 1000000000.0) << "s" << endl;
+//
+//	BoundaryConditions(0, nodes/2, 1.0);
+//
+//
+//	//for(int vv = 1; vv < 21; vv++)
+//	//{
+//	//int vv = 3;
+//		ChargeSetUp();
+//		//cout << "Z for " << vv << " volts: ";
+//		for(int z = 1; z < nodes; z++)
+//		{
+//			cout << z << ' ';
+//			cout.flush();
+//
+//			double v = 1.0;
+//
+//			for(int angle = 0; angle < electrodeCount/2; angle++)
+//			{
+//				BoundaryConditions(angle, z, v);
+//				GausSeidelIteration();
+//				GradientMagnitudes();
+//			}
+//		}
+//		cout << endl;
+//		SigmoidCharge(0.0, 50);
+//		string fileName = "rectangleAttemptParallel.tns";
+//		//char str[20];
+//		//sprintf(str,"-%d.tns",vv);
+//		//fileName += str;
+//		OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
+//	//}
+//
+////	Output("potential.dat", potential, -1, nodes/2);
+////	Output("field.dat", field, -1, nodes/2);
+////	Output("charge.dat", chargeIntegral, -1, nodes/2);
+////
+////	PrintChargeRange();
+////
+////	Control();
+//
+//		clock_gettime(CLOCK_MONOTONIC, &t_end);
+//		cout << "Execution time: " << (double)(diff(t_start, t_end).tv_nsec / 1000000000.0) << "s" << endl;
 
 }
 
