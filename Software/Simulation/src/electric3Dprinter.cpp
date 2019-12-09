@@ -485,6 +485,9 @@ int QuarterCircleDDA(int r, int circle[nodes][2])
 	int x = r;
 	int y = 0;
 	int s = -r;
+
+	// Compute one eighth of the circle. y is both coordinate and counter.
+
 	while(x >= y)
 	{
 		circle[y][0] = x;
@@ -500,6 +503,9 @@ int QuarterCircleDDA(int r, int circle[nodes][2])
 
 	int yTop = y;
 	y *= 2;
+
+	// If x == y at the eighth-circle point, don't repeat that point.
+
 	if(circle[yTop - 1][0] == circle[yTop - 1][1])
 	{
 		yTop--;
@@ -559,6 +565,32 @@ void ElectrodeRing(int r, int z)
 }
 
 
+// Construct a spherical shell of electrodes.
+
+void ElectrodeSphere()
+{
+	int circle[nodes][2];
+	int halfNumberOfRings = QuarterCircleDDA(radius, circle);
+
+	int zLow = zCentre - radius;
+	int r, z;
+	for(int h = 0; h < halfNumberOfRings; h++)
+	{
+		r = circle[h][1];
+		z = zLow + radius - circle[h][0];
+		cout << "r = " << r << ", z = " << z << endl;
+		ElectrodeRing(r, z);
+	}
+	for(int h = halfNumberOfRings - 1; h > 0 ; h--)
+	{
+		r = circle[h][1];
+		z = zCentre + circle[h][0] - 1;
+		cout << "r = " << r << ", z = " << z << endl;
+		ElectrodeRing(r, z);
+	}
+}
+
+
 // Initialise all the tensors for potential, field etc to 0, and also
 // set up the active region.
 
@@ -595,10 +627,6 @@ void Initialise()
 
 void BoundaryConditions(const int b, const int z, const double v)
 {
-
-	Initialise();
-	FindBoundary();
-
 	double halfDiagonal = 19.0;
 	double angle = 2.0*M_PI*(double)b/(double)electrodeCount;
 	if(angle > 0.5*M_PI)
@@ -635,7 +663,7 @@ void BoundaryConditions(const int b, const int z, const double v)
 // Output one disc at z for gnuplot into file fileName.  If activeR is positive, just output that
 // radius of the disc for close-ups of the middle.
 
-void Output(const char* fileName, const double a[nodes+2][nodes+2][nodes+2], const int activeR, const int z)
+void OutputDisc(const char* fileName, const double a[nodes+2][nodes+2][nodes+2], const int activeR, const int z)
 {
 	// Find the most negative value in the mesh and use that
 	// as the values outside the disc.
@@ -765,7 +793,7 @@ void OutputTensor(const char* fileName, const double a[nodes+2][nodes+2][nodes+2
 // Function to plot the boundary to test that it's properly set-up.
 // Not normally called.
 
-void TestBoundary()
+void TestBoundaryDisc()
 {
 	int z = nodes/2;
 	BoundaryConditions(0.0, z, 1.0);
@@ -780,7 +808,7 @@ void TestBoundary()
 		potential[electrodeNodes[x][0]][electrodeNodes[x][1]][z] += 1;
 		cout << x << ": (" << electrodeNodes[x][0] << ", " << electrodeNodes[x][1] << ")" << endl;
 	}
-	Output("boundary.dat", potential, -1, z);
+	OutputDisc("boundary.dat", potential, -1, z);
 }
 
 // Create a cylinder pattern in thresholdedChargeIntegral[][][] and write it out as
@@ -842,12 +870,36 @@ void TestCircle(int r)
 	cout << endl;
 }
 
+// Output the pattern of electrodes as a test.
+// Not normally called.
+
+void TestElectrodePattern()
+{
+	Initialise();
+	ElectrodeSphere();
+	for(int ec = 0; ec < electrodeCount; ec++)
+	{
+		potential [electrodeNodes[ec][0]] [electrodeNodes[ec][1]] [electrodeNodes[ec][2]] += 1.0;
+	}
+	OutputTensor("electrodes.tns", potential);
+}
+
+// (Re)set everything to the initial state
+
+void Reset()
+{
+	Initialise();
+	FindBoundary();
+	BoundaryConditions(0, nodes/2, 1.0);
+}
+
 // Remind the user what they can do.
 
 void Prompt()
 {
 	cout << endl << "Commands:" << endl;
 	cout << " s: - set sigmoid threshold and output a slice" << endl;
+	cout << " r: - reset to the initial state" << endl;
 	cout << " t: - create the tensor file" << endl;
 	cout << " h: - print this list" << endl;
 	cout << " q: - quit" << endl<< endl;
@@ -857,6 +909,10 @@ void Prompt()
 
 void Control()
 {
+	double s;
+	int z;
+	string fName;
+
 	cout << "Type h for help." << endl;
 	while(1)
 	{
@@ -871,11 +927,18 @@ void Control()
 			break;
 
 		case 's':
-			double s;
 			cout << "Sigmoid value for 0.5 point: ";
 			cin >> s;
 			SigmoidCharge(s, sigPower);
-			Output("threshold.dat", thresholdedChargeIntegral, -1, nodes/2);
+			cout << "Z value for slice [0, " << nodes << "]: ";
+			cin >> z;
+			cout << "Output file name: ";
+			cin >> fName;
+			OutputDisc(fName.c_str(), thresholdedChargeIntegral, -1, z);
+			break;
+
+		case 'r':
+			Reset();
 			break;
 
 		case 'q':
@@ -894,17 +957,20 @@ void Control()
 
 int main()
 {
-
-	TestCircle(24);
-
 //	struct timespec t_start, t_end;
 //	clock_gettime(CLOCK_MONOTONIC, &t_start);
 //
 //	//	TestBoundary();
+	TestElectrodePattern();
+//	for(int r = 0; r <= radius; r++)
+//	{
+//		cout << endl << "Radius: " << r << endl;
+//		TestCircle(r);
+//	}
 //	//  TestCylinder(15, 10, 40);
+//  //  TestCircle(24);
 //
-//
-//	BoundaryConditions(0, nodes/2, 1.0);
+//  Reset();
 //
 //
 //	//for(int vv = 1; vv < 21; vv++)
