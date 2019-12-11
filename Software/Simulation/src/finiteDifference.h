@@ -8,6 +8,14 @@
 #ifndef FINITEDIFFERENCE_H_
 #define FINITEDIFFERENCE_H_
 
+// Comment this line out if you are not using the testing functions
+
+#define TESTING
+
+// Comment this line out if you are not using OpenMP (https://www.openmp.org/) to parallelise and speed up the Gauss-Seidel PDE solution.
+
+#define PARALLEL
+
 // Multiplication is faster than division...
 
 const double oneSixth = 1.0/6.0;
@@ -24,6 +32,9 @@ const int sources = 2;
 
 class FiniteDifference
 {
+
+friend class Electrodes;
+
 public:
 	FiniteDifference();
 	void PrintChargeRange();
@@ -39,7 +50,15 @@ private:
 	void ChargeSetUp();
 	bool OnBoundary(const int x, const int y, const int z);
 	void Initialise();
+	void Reset();
 	void BoundaryConditions(const int b, const int z, const double v);
+
+#ifdef TESTING
+	void TestBoundaryDisc();
+	void TestCylinder(const int r, const int z0, const int z1);
+#endif
+
+	Electrodes electrodes;
 
 	double potential[nodes+2][nodes+2][nodes+2], lastPotential[nodes+2][nodes+2][nodes+2];
 

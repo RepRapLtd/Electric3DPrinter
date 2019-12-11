@@ -15,7 +15,9 @@
 #include <numeric>
 #include <ctime>
 
+#include "electrodes.h"
 #include "finiteDifference.h"
+
 
 using namespace std;
 
@@ -26,21 +28,9 @@ enum tankShape
 	sphere
 };
 
-
-// Comment this line out if you are not using OpenMP (https://www.openmp.org/) to parallelise and speed up the Gauss-Seidel PDE solution.
-
-#define PARALLEL
-
 // Set true for progress reports etc.
 
 bool debug = false;
-
-// List of nodes on the boundary in cyclic order and ascending z. The maximum possible
-// number, maxBoundary, is all the points on the X, Y faces.  These are the electrodes.
-
-const int maxElectrodes = 4*nodes*nodes;
-int electrodeCount = 0;
-int electrodeNodes[maxElectrodes][3];
 
 // The bigger this is, the closer the sigmoid function is to a step function
 

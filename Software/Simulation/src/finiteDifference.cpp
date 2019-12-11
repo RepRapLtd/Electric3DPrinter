@@ -10,6 +10,11 @@
 // Initialise all the tensors for potential, field etc to 0, and also
 // set up the active region.
 
+FiniteDifference::FiniteDifference()
+{
+
+}
+
 void FiniteDifference::Initialise()
 {
 	// Set up the active area and initialise the solution to 0.
@@ -36,6 +41,16 @@ void FiniteDifference::Initialise()
 	}
 }
 
+// (Re)set everything to the initial state
+
+void FiniteDifference::Reset()
+{
+	Initialise();
+	electrodes.FindBoundary();
+	BoundaryConditions(0, nodes/2, 1.0);
+}
+
+
 // Set the boundary conditions and initialise one solution with potentials applied at at z.
 // b is the index into the boundary array that decides how far round the circle voltages will
 // be applied.  v is the potential.
@@ -43,7 +58,7 @@ void FiniteDifference::Initialise()
 void FiniteDifference::BoundaryConditions(const int b, const int z, const double v)
 {
 	double halfDiagonal = 19.0;
-	double angle = 2.0*M_PI*(double)b/(double)electrodeCount;
+	double angle = 2.0*M_PI*(double)b/(double)electrodes.electrodeCount;
 	if(angle > 0.5*M_PI)
 		angle = M_PI - angle;
 	double radius = halfDiagonal*sin(M_PI*0.25)/sin(M_PI*0.75 - angle); // Triangle sine rule
@@ -53,12 +68,12 @@ void FiniteDifference::BoundaryConditions(const int b, const int z, const double
 
 	// Sources and sinks
 
-	source[0][0] = electrodeNodes[b][0];
-	source[0][1] = electrodeNodes[b][1];
+	source[0][0] = electrodes.electrodeNodes[b][0];
+	source[0][1] = electrodes.electrodeNodes[b][1];
 
-	int opposite = (b + electrodeCount/2)%electrodeCount;
-	source[1][0] = electrodeNodes[opposite][0];
-	source[1][1] = electrodeNodes[opposite][1];
+	int opposite = (b + electrodes.electrodeCount/2)%electrodes.electrodeCount;
+	source[1][0] = electrodes.electrodeNodes[opposite][0];
+	source[1][1] = electrodes.electrodeNodes[opposite][1];
 
 	potential[source[0][0]][source[0][1]][z] = voltage;
 	potential[source[1][0]][source[1][1]][z] = -voltage;
@@ -464,4 +479,58 @@ void FiniteDifference::OutputTensor(const char* fileName, const double a[nodes+2
 	}
 	outputFile.close();
 }
+
+#ifdef TESTING
+
+// Function to plot the boundary to test that it's properly set-up.
+// Not normally called.
+
+void FiniteDifference::TestBoundaryDisc()
+{
+	int z = nodes/2;
+	BoundaryConditions(0.0, z, 1.0);
+	for(int x = 0; x <= nodes; x++)
+	{
+		for(int y = 0; y <= nodes ; y++)
+			inside[x][y][z] = true;
+	}
+	potential[1][1][z] = 0.5;
+	for(int x = 0; x < electrodes.electrodeCount; x++)
+	{
+		potential[electrodes.electrodeNodes[x][0]][electrodes.electrodeNodes[x][1]][z] += 1;
+		cout << x << ": (" << electrodes.electrodeNodes[x][0] << ", " << electrodes.electrodeNodes[x][1] << ")" << endl;
+	}
+	OutputDisc("boundary.dat", potential, -1, z);
+}
+
+// Create a cylinder pattern in thresholdedChargeIntegral[][][] and write it out as
+// a tensor to test tensor output.  Not normally called.
+
+void FiniteDifference::TestCylinder(const int r, const int z0, const int z1)
+{
+	Initialise();
+	for(int x = 0; x <= nodes; x++)
+	{
+		int xd = x - xCentre;
+		for(int y = 0; y <= nodes; y++)
+		{
+			int yd = y - yCentre;
+			for(int z = 0; z <= nodes; z++)
+			{
+				if(z < z0 || z > z1 || (xd*xd + yd*yd) > r*r)
+				{
+					thresholdedChargeIntegral[x][y][z] = 0.0;
+				} else
+				{
+					thresholdedChargeIntegral[x][y][z] = 1.0;
+				}
+			}
+		}
+	}
+	OutputTensor("testCylinder.tns", thresholdedChargeIntegral);
+}
+
+#endif
+
+
 
