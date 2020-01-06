@@ -7,6 +7,11 @@
 
 #include "electric3Dprinter.h"
 
+Electrodes::Electrodes()
+{
+
+}
+
 // Find the 2D boundary pattern.  This is a disc in the middle of the Z range,
 // and is the same for all Z values.  This uses the 3D OnBoundary() function above, rather
 // than bother with an extra 2D version.  It relies on the order of scanning the nodes

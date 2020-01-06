@@ -10,10 +10,68 @@
 // Initialise all the tensors for potential, field etc to 0, and also
 // set up the active region.
 
-FiniteDifference::FiniteDifference()
+FiniteDifference::FiniteDifference(int nodeNumbers)
 {
+	nodes = nodeNumbers;
+	int nn = nodeNumbers + 2;
 
+	potential = new double**[nn];
+	lastPotential = new double**[nn];
+	field = new double**[nn];
+	chargeIntegral = new double**[nn];
+	thresholdedChargeIntegral = new double**[nn];
+	inside = new bool**[nn];
+
+	for(int n1 = 0; n1 < nn; n1++)
+	{
+		potential[n1] = new double*[nn];
+		lastPotential[n1] = new double*[nn];
+		field[n1] = new double*[nn];
+		chargeIntegral[n1] = new double*[nn];
+		thresholdedChargeIntegral[n1] = new double*[nn];
+		inside[n1] = new bool*[nn];
+
+		for(int n2 = 0; n2 < nn; n2++)
+		{
+			potential[n1][n2] = new double[nn];
+			lastPotential[n1][n2] = new double[nn];
+			field[n1][n2] = new double[nn];
+			chargeIntegral[n1][n2] = new double[nn];
+			thresholdedChargeIntegral[n1][n2] = new double[nn];
+			inside[n1][n2] = new bool[nn];
+		}
+	}
+
+	xCentre = nodes/2;
+	yCentre = nodes/2;
+	zCentre = nodes/2;
+	radius = nodes/2 - 3;
+
+	// Defaults...
+
+	// Gauss-Seidel convergence criterion
+
+	convergence = 0.0001;
+
+	// Gauss-Seidel relaxation (1.0 to turn off).
+
+	relax = 1.0;
+
+	// Stop Gauss-Seidel after this many iterations if there's no convergence
+
+	maxIterations = 3000;
 }
+
+// Set the PDE solution criteria
+
+void FiniteDifference::SetCriteria(double rlx, double conv, int mxI)
+{
+	relax = rlx;
+	convergence = conv;
+	maxIterations = mxI;
+}
+
+// (Re)set everything
 
 void FiniteDifference::Initialise()
 {
@@ -355,7 +413,7 @@ bool FiniteDifference::OnBoundary(const int x, const int y, const int z)
 // Output one disc at z for gnuplot into file fileName.  If activeR is positive, just output that
 // radius of the disc for close-ups of the middle.
 
-void FiniteDifference::OutputDisc(const char* fileName, const double a[nodes+2][nodes+2][nodes+2], const int activeR, const int z)
+void FiniteDifference::OutputDisc(const char* fileName, const double*** a, const int activeR, const int z)
 {
 	// Find the most negative value in the mesh and use that
 	// as the values outside the disc.
@@ -415,7 +473,7 @@ void FiniteDifference::OutputDisc(const char* fileName, const double a[nodes+2][
 // Output the tensor to file fileName that is the entire mesh so that a 3D iso-surface STL file
 // can be generated from it.
 
-void FiniteDifference::OutputTensor(const char* fileName, const double a[nodes+2][nodes+2][nodes+2])
+void FiniteDifference::OutputTensor(const char* fileName, const double*** a)
 {
 	// Find the maximum and minimum values.
 	// Assume the central point is active...

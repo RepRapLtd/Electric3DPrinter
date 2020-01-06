@@ -38,7 +38,6 @@
 
 #include "electric3Dprinter.h"
 
-FiniteDifference tank();
 
 //**********************************************************************************************
 
@@ -75,61 +74,65 @@ void Prompt()
 
 // Decide how to process the results.
 
-void Control()
-{
-	double s;
-	int z;
-	string fName;
-
-	cout << "Type h for help." << endl;
-	while(1)
-	{
-		cout << "Command: ";
-		char c;
-		cin >> c;
-
-		switch(c)
-		{
-		case 't':
-			OutputTensor("thresholdTensor.tns", thresholdedChargeIntegral);
-			break;
-
-		case 's':
-			cout << "Sigmoid value for 0.5 point: ";
-			cin >> s;
-			SigmoidCharge(s, sigPower);
-			cout << "Z value for slice [0, " << nodes << "]: ";
-			cin >> z;
-			cout << "Output file name: ";
-			cin >> fName;
-			OutputDisc(fName.c_str(), thresholdedChargeIntegral, -1, z);
-			break;
-
-		case 'r':
-			Reset();
-			break;
-
-		case 'q':
-			return;
-
-		default:
-			cout << endl << "Unrecognised command - " << c << endl;
-		case 'h':
-			Prompt();
-		}
-	}
-}
+//void Control()
+//{
+//	double s;
+//	int z;
+//	string fName;
+//
+//	cout << "Type h for help." << endl;
+//	while(1)
+//	{
+//		cout << "Command: ";
+//		char c;
+//		cin >> c;
+//
+//		switch(c)
+//		{
+//		case 't':
+//			OutputTensor("thresholdTensor.tns", thresholdedChargeIntegral);
+//			break;
+//
+//		case 's':
+//			cout << "Sigmoid value for 0.5 point: ";
+//			cin >> s;
+//			SigmoidCharge(s, sigPower);
+//			cout << "Z value for slice [0, " << nodes << "]: ";
+//			cin >> z;
+//			cout << "Output file name: ";
+//			cin >> fName;
+//			OutputDisc(fName.c_str(), thresholdedChargeIntegral, -1, z);
+//			break;
+//
+//		case 'r':
+//			Reset();
+//			break;
+//
+//		case 'q':
+//			return;
+//
+//		default:
+//			cout << endl << "Unrecognised command - " << c << endl;
+//		case 'h':
+//			Prompt();
+//		}
+//	}
+//}
 
 
 // Self-explanatory, I hope.
 
 int main()
 {
+	FiniteDifference tank;
+
 //	struct timespec t_start, t_end;
 //	clock_gettime(CLOCK_MONOTONIC, &t_start);
 //
 //	//	TestBoundary();
-	TestElectrodePattern();
+
+	tank.ElectrodePattern().TestElectrodePattern();
+
 //	for(int r = 0; r <= radius; r++)
 //	{
 //		cout << endl << "Radius: " << r << endl;

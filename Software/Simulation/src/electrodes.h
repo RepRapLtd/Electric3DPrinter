@@ -20,9 +20,16 @@ class Electrodes
 friend class FiniteDifference;
 
 public:
+	Electrodes();
+
+
+#ifdef TESTING
+	void TestCircle(int r);
+	void TestElectrodePattern();
+#endif
 
 private:
-	FiniteDifference tank;
+	FiniteDifference *tank;
 
 	// List of nodes on the boundary in cyclic order and ascending z. The maximum possible
 	// number, maxBoundary, is all the points on the X, Y faces.  These are the electrodes.
@@ -37,10 +44,7 @@ private:
 	void ElectrodeSphere();
 	void OutputElectrodes();
 
-#ifdef TESTING
-	void TestCircle(int r);
-	void TestElectrodePattern();
-#endif
+
 };
 
 
