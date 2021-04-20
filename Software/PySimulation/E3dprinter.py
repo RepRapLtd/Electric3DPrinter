@@ -67,7 +67,7 @@ radius = 22
 
 sources = 2
 
-source = [0.0 for i in range(sources) for j in range(3)]
+source = [[0.0 for i in range(3)] for j in range(sources)]
 
 # List of nodes on the 2D boundary in cyclic order. These are the same for all Z.
 
@@ -115,6 +115,9 @@ def TimeDifference(start, end):
 
 
 def PDE(x, y, z):
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     # Do nothing outside the active region
 
     if not inside[x][y][z]:
@@ -166,6 +169,8 @@ def PDE(x, y, z):
 # is the test of convergence.
 
 def GaussSeidelOnePass():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
     rms = 0.0
     for x in range(1, nodes):
         for y in range(1, nodes):
@@ -182,6 +187,8 @@ def GaussSeidelOnePass():
 # of the constant convergence.
 
 def GausSeidelIteration():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
     rms = 100.0 * convergence;
     i = 0;
     while i < maxIterations and rms > convergence:
@@ -197,6 +204,8 @@ def GausSeidelIteration():
 # the electric field, E.  Also add the values to the accumulating charge integral.
 
 def GradientMagnitudes():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
     for x in range(1, nodes):
         for y in range(1, nodes):
             for z in range(1, nodes):
@@ -231,6 +240,9 @@ def GradientMagnitudes():
 # Find and print the maximum and minimum values of the charge integral.
 
 def PrintChargeRange():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     # Assume the very mid point is not outside the active region...
 
     low = chargeIntegral[xCentre][yCentre][zCentre]
@@ -269,6 +281,8 @@ def RadiusToVoltage(r):
 # the integral of the current flowing through it.
 
 def SigmoidCharge(sigmoidOffset, sigmoidMultiplier):
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
     for x in range(1, nodes):
         for y in range(1, nodes):
             for z in range(1, nodes):
@@ -282,6 +296,9 @@ def SigmoidCharge(sigmoidOffset, sigmoidMultiplier):
 # Initialise the charges at the nodes.  Set them all 0 inside and outside the active region.
 
 def ChargeSetUp():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     for x in range(nodes):
         for y in range(nodes):
             for z in range(nodes):
@@ -292,6 +309,9 @@ def ChargeSetUp():
 # Tiny inefficiency - it checks [x][y][z] twice. 1/27th unnecessary...
 
 def OnBoundary(x, y, z):
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     if not inside[x][y][z]:
         return False
 
@@ -309,6 +329,9 @@ def OnBoundary(x, y, z):
 # to get the order round the boundary right.
 
 def FindBoundary():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     # Find the first quadrant
 
     boundaryCount = 0
@@ -349,12 +372,14 @@ def FindBoundary():
 
     if boundaryCount % 4 != 0:
         print("Number of boundary nodes is not a multiple of 4! ", boundaryCount)
-    print(boundaryCount)
 
 # Initialise all the tensors for potential, field etc to 0, and also
 # set up the active region.
 
 def Initialise():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     # Set up the active area and initialise the solution to 0.
 
     for x in range(nodes + 1):
@@ -378,6 +403,9 @@ def Initialise():
 # be applied.  v is the potential.
 
 def BoundaryConditions(b, z, v):
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     Initialise()
     FindBoundary()
 
@@ -395,7 +423,8 @@ def BoundaryConditions(b, z, v):
     source[0][0] = boundaryNodes[b][0]
     source[0][1] = boundaryNodes[b][1]
 
-    opposite = (b + boundaryCount / 2) % boundaryCount
+    opposite = (b + (boundaryCount//2)) % boundaryCount
+    opposite = int(opposite+0.1)
     source[1][0] = boundaryNodes[opposite][0];
     source[1][1] = boundaryNodes[opposite][1];
 
@@ -415,6 +444,9 @@ def BoundaryConditions(b, z, v):
 # radius of the disc for close-ups of the middle.
 
 def Output(fileName, a, activeR, z):
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     # Find the most negative value in the mesh and use that
     # as the values outside the disc.
 
@@ -455,6 +487,9 @@ def Output(fileName, a, activeR, z):
 # can be generated from it.
 
 def OutputTensor(fileName, a):
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     # Find the maximum and minimum values.
     # Assume the central point is active...
 
@@ -500,7 +535,10 @@ def OutputTensor(fileName, a):
 # Not normally called.
 
 def TestBoundary():
-    z = nodes / 2
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
+    z = nodes//2
     BoundaryConditions(0.0, z, 1.0)
     for x in range(nodes + 1):
         for y in range(nodes + 1):
@@ -517,6 +555,9 @@ def TestBoundary():
 # a tensor to test tensor output.  Not normally called.
 
 def TestCylinder(r, z0, z1):
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     Initialise();
     for x in range(nodes + 1):
         xd = x - xCentre
@@ -543,6 +584,9 @@ def Prompt():
 # Decide how to process the results.
 
 def Control():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     print("Type h for help.")
     while (True):
         c = input("Command: ")
@@ -553,7 +597,7 @@ def Control():
         elif c == 's':
             s = input("Sigmoid value for 0.5 point: ")
             SigmoidCharge(s, sigPower)
-            Output("threshold.dat", thresholdedChargeIntegral, -1, nodes / 2)
+            Output("threshold.dat", thresholdedChargeIntegral, -1, nodes//2)
         elif c == 'q':
             return
         elif c == 'h':
@@ -564,12 +608,15 @@ def Control():
 
 
 def Run():
+    global debug,convergence,relax,nodes,xCentre,yCentre,zCentre,radius,sources,source,maxBoundary,boundaryCount,boundaryNodes,\
+        maxIterations,potential,lastPotential,field,chargeIntegral,thresholdedChargeIntegral,inside,oneSixth,sigPower
+
     startTime = time.time()
 
     # TestBoundary();
     #  TestCylinder(15, 10, 40);
 
-    BoundaryConditions(0, nodes / 2, 1.0);
+    BoundaryConditions(0, nodes//2, 1.0);
 
     # for(int vv = 1; vv < 21; vv++)
     # {
@@ -579,13 +626,12 @@ def Run():
     for z in range(nodes):
         print(z, ' ', end='', flush=True)
 
-    v = 1.0;
+        v = 1.0;
 
-    for angle in range(boundaryCount / 2):
-        BoundaryConditions(angle, z, v)
-        GausSeidelIteration()
-        GradientMagnitudes()
-
+        for angle in range(boundaryCount//2):
+            BoundaryConditions(angle, z, v)
+            GausSeidelIteration()
+            GradientMagnitudes()
 
     print()
     SigmoidCharge(0.0, 50)
