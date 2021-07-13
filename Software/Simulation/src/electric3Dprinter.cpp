@@ -796,6 +796,9 @@ void OutputVoltagePattern(const char* vFileName)
 
 bool SetBoundary(ifstream& voltageFile)
 {
+	Initialise();
+	FindBoundary();
+
 	double voltage1, voltage2;
 	int z;
 
@@ -823,13 +826,20 @@ void RunFromVoltagePattern(const char* vFileName)
 
 	ChargeSetUp();
 
+	int count = -1;
+
 	while(SetBoundary(voltageFile))
 	{
 			GausSeidelIteration();
 			GradientMagnitudes();
+			count++;
+			if(!(count%100))
+			{
+				cout << "At " << count << " voltage file line." << endl;
+			}
 	}
 	SigmoidCharge(0.0, 50);
-	string fileName = "TEST13-7-21NUMBER2.tns";
+	string fileName = "file-mediated.tns";
 	OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
 }
 
@@ -838,65 +848,18 @@ void RunFromVoltagePattern(const char* vFileName)
 
 int main()
 {
-	//OutputVoltagePattern("voltagefile.v");
-	RunFromVoltagePattern("voltagefile.v");
 
-	/*
+
+
 	struct timespec t_start, t_end;
 	clock_gettime(CLOCK_MONOTONIC, &t_start);
 
-	//	TestBoundary();
-	//  TestCylinder(15, 10, 40);
-
-	ofstream voltageFile;
-	voltageFile.open("voltagefile.v");
-
-	BoundaryConditions(voltageFile, 0, nodes/2, 1.0);
-
-
-	//for(int vv = 1; vv < 21; vv++)
-	//{
-	//int vv = 3;
-		ChargeSetUp();
-		//cout << "Z for " << vv << " volts: ";
-		for(int z = 1; z < nodes; z++)
-		{
-			cout << z << ' ';
-			cout.flush();
-
-			double v = 1.0;
-
-			for(int angle = 0; angle < boundaryCount/2; angle++)
-			{
-				BoundaryConditions(voltageFile, angle, z, v);
-				GausSeidelIteration();
-				GradientMagnitudes();
-			}
-		}
-		cout << endl;
-		SigmoidCharge(0.0, 50);
-		string fileName = "test13-7-21.tns";
-		//char str[20];
-		//sprintf(str,"-%d.tns",vv);
-		//fileName += str;
-		OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
-		voltageFile << -1 << ',' << -1 << ',' << -1 << ',' << -1 << ',' << -1 << ',' << -1 << ',' << -1 << ',' << -1 << endl;
-	//}
-
-//	Output("potential.dat", potential, -1, nodes/2);
-//	Output("field.dat", field, -1, nodes/2);
-//	Output("charge.dat", chargeIntegral, -1, nodes/2);
-//
-//	PrintChargeRange();
-//
-//	Control();
-
-		voltageFile << -2 << ',' << -2 << ',' << -2 << ',' << -2 << ',' << -2 << ',' << -2 << ',' << -2 << ',' << -2 << endl;
-		voltageFile.close();
+	//OutputVoltagePattern("voltagefile.v");
+	RunFromVoltagePattern("voltagefile.v");
 
 		clock_gettime(CLOCK_MONOTONIC, &t_end);
 		cout << "Execution time: " << (double)(diff(t_start, t_end).tv_nsec / 1000000000.0) << "s" << endl;
-		*/
+
 
 }
 
