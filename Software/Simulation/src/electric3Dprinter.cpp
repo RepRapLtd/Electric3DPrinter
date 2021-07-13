@@ -810,7 +810,7 @@ bool SetBoundary(ifstream& voltageFile)
 	// Sources and sinks
 
 	potential[source[0][0]][source[0][1]][z] = voltage1;
-	potential[source[1][0]][source[1][1]][z] = -voltage2;
+	potential[source[1][0]][source[1][1]][z] = voltage2;
 
 	return true;
 }
