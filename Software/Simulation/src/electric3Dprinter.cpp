@@ -34,6 +34,10 @@
  *
  *  $ dmc -tensor myoutputdata.tns -iso 0.5 -out myobject.stl
  *
+ *  -------
+ *
+ *  Errors but runs? Right click project and reindex.
+ *
  */
 
 #include <iostream>
@@ -510,7 +514,7 @@ void Initialise()
 // b is the index into the boundary array that decides how far round the circle voltages will
 // be applied.  v is the potential.
 
-void BoundaryConditions(const int b, const int z, const double v)
+void BoundaryConditions(ofstream &voltageFile, const int b, const int z, const double v)
 {
 
 	Initialise();
@@ -536,8 +540,7 @@ void BoundaryConditions(const int b, const int z, const double v)
 
 	potential[source[0][0]][source[0][1]][z] = voltage;
 	potential[source[1][0]][source[1][1]][z] = -voltage;
-
-
+	voltageFile << source[0][0] << ' ' << source[0][1] << ' ' << z << ' ' << voltage << ' ' << source[1][0] << ' ' << source[1][1] << ' ' << z << ' ' << -voltage << endl;
 
 	//double angle = atan2(yCentre - source[0][1], xCentre - source[0][0]);
 	//	potential[source[0][0]][source[0][1]] = 2.0 + sin(4.0*angle);
@@ -682,10 +685,10 @@ void OutputTensor(const char* fileName, const double a[nodes+2][nodes+2][nodes+2
 // Function to plot the boundary to test that it's properly set-up.
 // Not normally called.
 
-void TestBoundary()
+void TestBoundary(ofstream &voltageFile)
 {
 	int z = nodes/2;
-	BoundaryConditions(0.0, z, 1.0);
+	BoundaryConditions(voltageFile, 0.0, z, 1.0);
 	for(int x = 0; x <= nodes; x++)
 	{
 		for(int y = 0; y <= nodes ; y++)
@@ -774,19 +777,81 @@ void Control()
 	}
 }
 
+void OutputVoltagePattern(const char* vFileName)
+{
+	ofstream voltageFile;
+	voltageFile.open(vFileName);
+	double v = 1.0;
+	BoundaryConditions(voltageFile, 0, nodes/2, 1.0);
+	for(int z = 1; z < nodes; z++)
+	{
+		for(int angle = 0; angle < boundaryCount/2; angle++)
+		{
+			BoundaryConditions(voltageFile, angle, z, v);
+		}
+	}
+	voltageFile << -1 << ' ' << -1 << ' ' << -1 << ' ' << -1 << ' ' << -1 << ' ' << -1 << ' ' << -1 << ' ' << -1 << endl;
+	voltageFile.close();
+}
+
+bool SetBoundary(ifstream& voltageFile)
+{
+	double voltage1, voltage2;
+	int z;
+
+	voltageFile >> source[0][0] >> source[0][1] >> z >> voltage1 >> source[1][0] >> source[1][1] >> z >> voltage2;
+
+	if(source[0][0] < 0)
+		return false;
+
+	// Sources and sinks
+
+	potential[source[0][0]][source[0][1]][z] = voltage1;
+	potential[source[1][0]][source[1][1]][z] = -voltage2;
+
+	return true;
+}
+
+void RunFromVoltagePattern(const char* vFileName)
+{
+	ifstream voltageFile;
+	voltageFile.open(vFileName);
+
+	// Throw the first line away
+
+	SetBoundary(voltageFile);
+
+	ChargeSetUp();
+
+	while(SetBoundary(voltageFile))
+	{
+			GausSeidelIteration();
+			GradientMagnitudes();
+	}
+	SigmoidCharge(0.0, 50);
+	string fileName = "TEST13-7-21NUMBER2.tns";
+	OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
+}
+
 
 // Self-explanatory, I hope.
 
 int main()
 {
+	//OutputVoltagePattern("voltagefile.v");
+	RunFromVoltagePattern("voltagefile.v");
+
+	/*
 	struct timespec t_start, t_end;
 	clock_gettime(CLOCK_MONOTONIC, &t_start);
 
 	//	TestBoundary();
 	//  TestCylinder(15, 10, 40);
 
+	ofstream voltageFile;
+	voltageFile.open("voltagefile.v");
 
-	BoundaryConditions(0, nodes/2, 1.0);
+	BoundaryConditions(voltageFile, 0, nodes/2, 1.0);
 
 
 	//for(int vv = 1; vv < 21; vv++)
@@ -803,18 +868,19 @@ int main()
 
 			for(int angle = 0; angle < boundaryCount/2; angle++)
 			{
-				BoundaryConditions(angle, z, v);
+				BoundaryConditions(voltageFile, angle, z, v);
 				GausSeidelIteration();
 				GradientMagnitudes();
 			}
 		}
 		cout << endl;
 		SigmoidCharge(0.0, 50);
-		string fileName = "rectangleAttemptParallel.tns";
+		string fileName = "test13-7-21.tns";
 		//char str[20];
 		//sprintf(str,"-%d.tns",vv);
 		//fileName += str;
 		OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
+		voltageFile << -1 << ',' << -1 << ',' << -1 << ',' << -1 << ',' << -1 << ',' << -1 << ',' << -1 << ',' << -1 << endl;
 	//}
 
 //	Output("potential.dat", potential, -1, nodes/2);
@@ -825,8 +891,12 @@ int main()
 //
 //	Control();
 
+		voltageFile << -2 << ',' << -2 << ',' << -2 << ',' << -2 << ',' << -2 << ',' << -2 << ',' << -2 << ',' << -2 << endl;
+		voltageFile.close();
+
 		clock_gettime(CLOCK_MONOTONIC, &t_end);
 		cout << "Execution time: " << (double)(diff(t_start, t_end).tv_nsec / 1000000000.0) << "s" << endl;
+		*/
 
 }
 
