@@ -815,7 +815,7 @@ bool SetBoundary(ifstream& voltageFile)
 	return true;
 }
 
-void RunFromVoltagePattern(const char* vFileName)
+void RunFromVoltagePattern(const char* vFileName, const char* tFileName)
 {
 	ifstream voltageFile;
 	voltageFile.open(vFileName);
@@ -833,34 +833,48 @@ void RunFromVoltagePattern(const char* vFileName)
 			GausSeidelIteration();
 			GradientMagnitudes();
 			count++;
-			if(!(count%100))
+			if(!(count%50))
 			{
 				cout << "At " << count << " voltage file line." << endl;
 			}
 	}
 	SigmoidCharge(0.0, 50);
-	string fileName = "file-mediated.tns";
+	string fileName = tFileName;
 	OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
 }
 
+void SaveBoundary(const char* bFileName)
+{
+	Initialise();
+	FindBoundary();
+	ofstream boundaryFile;
+	boundaryFile.open(bFileName);
+	boundaryFile << boundaryCount << endl;
+	for (int b = 0; b < boundaryCount; b++)
+	{
+		boundaryFile << boundaryNodes[b][0] << ' ' << boundaryNodes[b][1] << endl;
+	}
+	boundaryFile.close();
+}
 
 // Self-explanatory, I hope.
 
-int main()
+int main(int argc, char *argv[])
 {
-
-
-
+	if(argc != 3)
+	{
+		cout << "Electric 3D printer simulation error - wrong arguments." << endl;
+		exit(1);
+	}
 	struct timespec t_start, t_end;
 	clock_gettime(CLOCK_MONOTONIC, &t_start);
 
 	//OutputVoltagePattern("voltagefile.v");
-	RunFromVoltagePattern("voltagefile.v");
+	RunFromVoltagePattern(argv[0], argv[1]);
+	//SaveBoundary("boundaryNodes.txt");
 
-		clock_gettime(CLOCK_MONOTONIC, &t_end);
-		cout << "Execution time: " << (double)(diff(t_start, t_end).tv_nsec / 1000000000.0) << "s" << endl;
-
-
+	clock_gettime(CLOCK_MONOTONIC, &t_end);
+	cout << "Execution time: " << (double)(diff(t_start, t_end).tv_nsec / 1000000000.0) << "s" << endl;
 }
 
 
