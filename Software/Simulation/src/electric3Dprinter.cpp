@@ -839,8 +839,8 @@ void RunFromVoltagePattern(const char* vFileName, const char* tFileName)
 			}
 	}
 	SigmoidCharge(0.0, 50);
-	string fileName = tFileName;
-	OutputTensor(fileName.c_str(), thresholdedChargeIntegral);
+
+	OutputTensor(tFileName, thresholdedChargeIntegral);
 }
 
 void SaveBoundary(const char* bFileName)
@@ -870,7 +870,7 @@ int main(int argc, char *argv[])
 	clock_gettime(CLOCK_MONOTONIC, &t_start);
 
 	//OutputVoltagePattern("voltagefile.v");
-	RunFromVoltagePattern(argv[0], argv[1]);
+	RunFromVoltagePattern(argv[1], argv[2]);
 	//SaveBoundary("boundaryNodes.txt");
 
 	clock_gettime(CLOCK_MONOTONIC, &t_end);
