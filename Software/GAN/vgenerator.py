@@ -49,16 +49,22 @@ def LoadBoundary(fileName):
   y = int(boundaryText[count])
   count += 1
   boundary.append([x, y])
-  return boundary
+ return boundary
 
 def RandomBoundaryPoint(boundary):
- return random.choice(boundary)
+ e = random.randrange(0, boundary.__len__())
+ return boundary[e]
+
+# This attempts to put more electrodes at the Z extremes, to try to reduce end
+# effects and make a blob in the middle. Sort of works...
 
 def RandomZ():
- z = random.random()
- z = 50.0*random.random()*(0.5 + 0.5*maths.cos(z*2.0*maths.pi))
- z = 1 + int(z)
- return z
+ y = random.random()
+ if y < 0.5:
+  x = 2*y*y
+ else:
+  x = 0.5*(1 + maths.sqrt(y - 0.5))
+ return 1 + int(x*50.0)
 
 def RandomVoltage():
  return random.random()*50.0

@@ -1,0 +1,65 @@
+#
+# FreeCAD Python Macro to display a simulation voltage file.
+#
+# Adrian Bowyer
+# reprapltd.com
+#
+# 21 July 2021
+#
+# Licence: GPL
+#
+
+import Part, FreeCAD
+import math as maths
+from FreeCAD import Base
+
+# Parameters
+
+radius = 0.5       # The radius of the cylinders
+
+#********************************************************************************
+
+# There must be an easier way to make the null set...
+
+def Null():
+ n1 = Part.makeBox(1, 1, 1)
+ n2 = Part.makeBox(1, 1, 1)
+ n2.translate(Base.Vector(10, 10, 10))
+ return(n1.common(n2))
+
+
+# Make a single cylinder (fibre)
+# This assumes that the axis is a unit vector
+
+
+def PlotLine(p0, p1):
+ axis = p1.sub(p0)
+ len = axis.Length
+ if len < 0.5:
+  return Null()
+ print(p0)
+ print(p1)
+ c = Part.makeCylinder(0.5, axis.Length, p0, axis, 360)
+ return c
+
+def ReadLines(fileName):
+ file = open(fileName, "r")
+ lineText = file.read()
+ lineText = lineText.split()
+ count = 0
+ loop = True
+ while loop:
+  p0 = Base.Vector( float(lineText[count]), float(lineText[count+1]), float(lineText[count+2]) )
+  count += 4 # Ignore voltage
+  p1 = Base.Vector( float(lineText[count]), float(lineText[count+1]), float(lineText[count+2]) )
+  count += 4 # Ignore voltage
+  loop = (p0[0] >= 0.0)
+  if loop:
+   Part.show(PlotLine(p0, p1))
+
+
+
+
+# The pattern is the union of all the cylinders
+
+ReadLines("/home/ensab/Desktop/rrlOwncloud/RepRapLtd/Engineering/Internal-Projects/Electric3DPrinter/Software/GAN/t2.v")
