@@ -31,7 +31,7 @@ The invention combines three ideas to make a fourth.  The three are:
 3.  [Electropolymerisation](https://www.sciencedirect.com/topics/materials-science/electropolymerization).
 
 My overall synthesis of the three is to use an electric current to make a liquid plastic monomer polymerise to a solid in such a way that it forms a 3-dimensional object with a specified shape, and to do that with a single scan in a time of (I hope…) a few seconds.  Let me start by describing the three precursor technologies in more detail:
- [![Berkeley Livermore Process](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/berkeley-livermore-process-1024x305.jpg)](https://reprapltd.com/wp-content/uploads/2019/07/berkeley-livermore-process.jpg) [](https://reprapltd.com/wp-content/uploads/2019/07/berkeley-livermore-process.jpg)
+ ![Berkeley Livermore Process](https://reprapltd.com/wp-content/uploads/2019/07/berkeley-livermore-process.jpg) [](https://reprapltd.com/wp-content/uploads/2019/07/berkeley-livermore-process.jpg)
 
 The Berkeley/Livermore system [thanks to [B. E. Kelly et al., *Science* 10.1126/science.aau7114 (2019)](https://science.sciencemag.org/content/363/6431/1075)].
 
@@ -88,11 +88,11 @@ The model does not start with a shape that is to be printed and try to work out 
 
 Let V be the potentials over the disc, and E be the field.  Then Laplace’s simplification of Poisson’s equation
 
-∇2V=0,∇2V=0,
+∇<sup>2</sup>V=0,
 
 when solved gives V, and E can then be found from
 
-E=−∇V.E=−∇V.
+E=−∇V.
 
 The current through any node will be proportional to the magnitude of the vector *E* at that node.  Integrate that current over the time of the whole simulation, and you have the total charge that has run through that node, which should decide if it sets solid or not.
 
