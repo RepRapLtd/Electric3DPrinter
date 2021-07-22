@@ -37,9 +37,7 @@ def PlotLine(p0, p1):
  len = axis.Length
  if len < 0.5:
   return Null()
- print(p0)
- print(p1)
- c = Part.makeCylinder(0.5, axis.Length, p0, axis, 360)
+ c = Part.makeCylinder(0.1, axis.Length, p0, axis, 360)
  return c
 
 def ReadLines(fileName):

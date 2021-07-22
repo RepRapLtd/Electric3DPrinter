@@ -27,13 +27,14 @@ def ReadTNS(fileName):
     count += 1
  return tensor
 
-def MakeDAE(tnsFileName, daeFileName):
+
+def ExportMesh(tnsFileName, meshFileName):
  tensor = ReadTNS(tnsFileName)
 # Extract the isosurface
  vertices, triangles = mcubes.marching_cubes(tensor, 0.5)
 # Export the result
- mcubes.export_mesh(vertices, triangles, daeFileName, "print")
- print("DAE file exported")
+ mcubes.export_obj(vertices, triangles, meshFileName)
+ print("Mesh file exported")
 
 
 def LoadBoundary(fileName):
@@ -52,43 +53,68 @@ def LoadBoundary(fileName):
  return boundary
 
 def RandomBoundaryPoint(boundary):
- e = random.randrange(0, boundary.__len__())
- return boundary[e]
+ return random.choice(boundary)
+
+def RoughlyOppositeBoundaryPair(boundary):
+ len = boundary.__len__()
+ a = random.randint(0, len-1)
+ b = random.randint(0, round(len/5))
+ b = b - round(len/10)
+ b = a + round(len/2) + b
+ b = b%len
+ return (boundary[a], boundary[b])
 
 # This attempts to put more electrodes at the Z extremes, to try to reduce end
 # effects and make a blob in the middle. Sort of works...
 
-def RandomZ():
+def RandomZ(bottom, span):
  y = random.random()
  if y < 0.5:
   x = 2*y*y
  else:
-  x = 0.5*(1 + maths.sqrt(y - 0.5))
- return 1 + int(x*50.0)
+  x = 0.5 + maths.sqrt((y - 0.5)*0.5)
+ return bottom + int(x*span)
 
 def RandomVoltage():
  return random.random()*50.0
 
+def TopAndBottomFill(file, boundary, endCount, endDepth):
+ for l in range(endCount):
+  b = RoughlyOppositeBoundaryPair(boundary)
+  b0 = b[0]
+  b1 = b[1]
+  s = str(b0[0]) + ' ' + str(b0[1]) + ' ' + str(RandomZ(1, endDepth)) + ' ' + str(RandomVoltage()) + ' '
+  s = s + str(b1[0]) + ' ' + str(b1[1]) + ' ' + str(RandomZ(1, endDepth)) + ' ' + str(-RandomVoltage()) + '\n'
+  file.write(s)
+ for l in range(endCount):
+  b = RoughlyOppositeBoundaryPair(boundary)
+  b0 = b[0]
+  b1 = b[1]
+  s = str(b0[0]) + ' ' + str(b0[1]) + ' ' + str(RandomZ(51 - endDepth, endDepth)) + ' ' + str(RandomVoltage()) + ' '
+  b = RandomBoundaryPoint(boundary)
+  s = s + str(b1[0]) + ' ' + str(b1[1]) + ' ' + str(RandomZ(51 - endDepth, endDepth)) + ' ' + str(-RandomVoltage()) + '\n'
+  file.write(s)
 
-def CreateVoltages(fileName, voltages):
+def CreateVoltages(fileName, voltages, endCount, endDepth):
  boundary = LoadBoundary("boundaryNodes.txt")
  file = open(fileName, "w")
+ TopAndBottomFill(file, boundary, endCount, endDepth)
  for l in range(voltages):
   b = RandomBoundaryPoint(boundary)
-  s = str(b[0]) + ' ' + str(b[1]) + ' ' + str(RandomZ()) + ' ' + str(RandomVoltage()) + ' '
+  s = str(b[0]) + ' ' + str(b[1]) + ' ' + str(RandomZ(1, 51)) + ' ' + str(RandomVoltage()) + ' '
   b = RandomBoundaryPoint(boundary)
-  s = s + str(b[0]) + ' ' + str(b[1]) + ' ' + str(RandomZ()) + ' ' + str(-RandomVoltage()) + '\n'
+  s = s + str(b[0]) + ' ' + str(b[1]) + ' ' + str(RandomZ(1, 51)) + ' ' + str(-RandomVoltage()) + '\n'
   file.write(s)
  file.write("-1 -1 -1 -1 -1 -1 -1 -1\n")
  print("Voltage file created")
  file.close()
 
-def RunASimulation(name, voltages):
- CreateVoltages(name + ".v", voltages)
+def RunASimulation(name, voltages, endCount, endDepth):
+ CreateVoltages(name + ".v", voltages, endCount, endDepth)
  subprocess.run(["./Electric3DPrinter", (name + ".v"), (name + ".tns")])
  print("C++ simulation run")
- MakeDAE(name + ".tns", name + ".dae")
+ ExportMesh(name + ".tns", name + ".obj")
 
 
 random.seed(a=None, version=2)
-RunASimulation("t2", 200)
+RunASimulation("t2", 100, 50, 10)
