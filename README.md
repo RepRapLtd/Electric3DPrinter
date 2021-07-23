@@ -37,7 +37,7 @@ Nanowires made on a surface by electropolymerisation; scale bar is 10 μm [than
 
 Thirdly, Electropolymerisation.  The clue here is in the name – this is causing a liquid monomer to polymerise to a solid by passing electricity through it rather than light (or other forms of energy).
 
-[eprint](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/eprint600.png)
+![eprint](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/eprint600.png)
 
 The Electric 3D Printing system proposed here.
 
@@ -75,7 +75,7 @@ Let V be the potentials over the disc, and E be the field.  Then Laplace’s si
 
 when solved gives <em>V</em>, and <em>E</em> can then be found from
 
-<center><em>E</em>=−∇<em>V</em>.</center>
+<div align="center"><em>E</em>=−∇<em>V</em>.</div>
 
 The current through any node will be proportional to the magnitude of the vector *E* at that node.  Integrate that current over the time of the whole simulation, and you have the total charge that has run through that node, which should decide if it sets solid or not.
 
@@ -85,23 +85,19 @@ In their simplest form those boundary conditions consist of a circular perimeter
 
  
 
-[![simple-potential](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/simple-potential.png)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/simple-potential.png) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/simple-potential.png)
+![simple-potential](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/simple-potential.png)
 
 Potential, *V*, over the disc
 
 The numbers don’t mean much – the picture would look the same but for scaling with 100 volts as with 1 volt.  The flat area is outside the disc and can be ignored.  The peak and the valley are the positive and negative electrodes, and the rest of the grid is the potential everywhere else.   Taking the partial derivatives of *V* at each node with respect to *x* and *y* gives the vector *E* at that node.  Pythagoras then gives the magnitude of *E*:
 
- 
-
-[![simple-field](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/simple-field.png)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/simple-field.png) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/simple-field.png)
+![simple-field](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/simple-field.png)
 
 Field magnitude, |*E*|, over the disc.
 
 As mentioned above, the current flowing through each node will be proportional to the value of the magnitude of *E* at the node.  The currents are, as would be expected, greatest at the electrodes.  But I was encouraged by the slope in the middle of the plot of the potentials, which corresponds to the non-zero plateau in the middle of the field magnitude plot.  I thought that if one were to pass a series of currents from the electrodes as they were energised round the circle the sum of charges in the middle might exceed that at the individual electrodes, and so one would have built a solid disc in the middle and left liquid monomer round the outsides.  Unfortunately, this did not happen.  Here is the result of energising twenty pairs of electrodes in sequence and integrating the currents flowing through all the nodes for each one:
 
- 
-
-[![sum-of-charges](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/sum-of-charges.png)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/sum-of-charges.png) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/sum-of-charges.png)
+[[sum-of-charges](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/sum-of-charges.png)
 
 Integral of the current from twenty electrodes energised sequentially round the disc.
 
@@ -124,9 +120,7 @@ Obviously (after two days of thought…) if the machine prints solid where you d
 
 Remember Loctite:
 
-[![loctight](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/loctight-300x198.jpg)](https://reprapltd.com/wp-content/uploads/2019/08/loctight.jpg) [](https://reprapltd.com/wp-content/uploads/2019/08/loctight.jpg)
-
- 
+[[loctight](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/loctight.jpg)
 
 This is a remarkable material that polymerises solid except in the presence of oxygen, which keeps it monomeric.  Thus when you tighten a nut and bolt with liquid Loctite on the threads this excludes the oxygen, solidifies the Loctite, and locks the nut to the bolt.  Loosen them a bit to allow the oxygen back in, and the polymer depolymerises back to a liquid, and the threads can be undone easily because the reaction is also reversible.  (The – possibly apocryphal – story is that Vernon Krieble, the inventor of Loctite, had greater difficulty making a bottle that would allow oxygen to permeate in to keep the stuff liquid than he did making Loctite itself.)
 
@@ -134,20 +128,20 @@ Let’s suppose that we can make a monomer that behaves like Loctite, but in whi
 
 The transition from solid to liquid with charge integral would not be instant.  For this simulation I propose a sigmoid function, as I mentioned above:
 
-[![sigmoid](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/sigmoid.png)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/sigmoid.png) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/sigmoid.png)
- f(x)=1–ea(x–b)/(ea(x–b)+1)f(x)=1–ea(x–b)/(ea(x–b)+1)
+![sigmoid](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/sigmoid.png)
+ *f*(*x*)=1–*e*<sup>*a*(*x–b*)</sup>/(*e*<sup>*a*(*x–b*)</sup>+1)
 
 Ignore the negative bit of the abscissa; that’s just there for me to check things are correct; you can’t have negative charge integral just as you can’t have -3 apples. The variables *a* and *b* alter the shape and offset to the right of the sigmoid function and can be played around with in the simulation to experiment, or maybe one day to match the characteristics of a real polymer.  The charge integral (the last surface plot above) was normalised to lie in the range [0, 1].  That is the value of *x* in the sigmoid function.  The vertical axis is degree of polymerisation: 0 charge gives solid, and the (at the moment hypothetical) material liquifies as charge integral increases to the right, going fully liquid at a value around 0.2.  Note at this stage these numbers aren’t real coulombs; they would be, however, proportional to real coulombs in a real machine. (The values *a* = 50 and *b* = 0.1 were used for this, incidentally.)
 
 As with the last surface plot above, if we put 1 “volt” on each electrode round the circle in turn, along with -1 “volt” on the diametrically opposite electrode, we now print this:
 
-[![disc-1](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/disc-1.png)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/disc-1.png) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/disc-1.png)
+![disc-1](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/disc-1.png)
 
 It’s solid in a circle in the middle, and liquid all around.  We’ve printed a disc!  Remember that the height of the surface from 0 to 1 represents the degree of polymerisation of the monomer – higher means more solid.
 
 Now here’s what happens if we just put 1 “volt” on a quarter of the electrodes adjacent to each other and -1 “volt” on those diametrically opposite them:
 
-[![rectangular-block](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/rectangular-block.png)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/rectangular-block.png) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/rectangular-block.png)
+![rectangular-block](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/rectangular-block.png)
 
 We’ve printed a (roughly) rectangular block.
 
@@ -166,9 +160,7 @@ The simulator now solves for Laplace’s equation in 3D.
 
 Here’s the result of running round the bottom of the cylindrical reaction vessel in a circle putting 1 “volt” on each electrode and -1 “volt” on the opposite one, and moving up one level in Z then repeating that for the next ring of electrodes all the way up to the top.  The transparent cylinder is the reaction vessel itself (without the electrodes for clarity):
 
-[![printedcylinder](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/printedcylinder-291x300.png)](https://reprapltd.com/wp-content/uploads/2019/07/printedcylinder.png) [](https://reprapltd.com/wp-content/uploads/2019/07/printedcylinder.png)
-
- 
+![printedcylinder](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/printedcylinder.png)
 
 It’s printed a cylinder!
 
@@ -181,7 +173,7 @@ The Effect of More Voltage or Longer Accumulated Charge (13 September)
 
 I ran a series of tests to make cylinders like the one above, increasing the voltage applied to the electrodes, which we would expect to reduce the diameter of the resulting cylinder.  Here is the result:
 
-[![20-concentric](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/20-concentric-1-300x300.png)](https://reprapltd.com/wp-content/uploads/2019/09/20-concentric-1.png) [](https://reprapltd.com/wp-content/uploads/2019/09/20-concentric-1.png)
+![20-concentric](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/20-concentric-1.png)
 
 The outer box surrounds the 50x50x50 node finite-difference PDE solution grid, and the transparent cylinder is the modelled tank of the machine (outside that there is no voltage, no current, and no 3D printing material).  The tank is 44 nodes in diameter.  In the middle are 20 concentric separately-printed cylinders all superimposed for comparison.
 
@@ -191,7 +183,7 @@ That was done 20 times, increasing the value of V from 1 to 20.
 
 All the units are arbitrary, of course; Laplace’s equation doesn’t know anything about the difference between 1 mm and 1 cm, and 1 volt or 10 volts; as long as things were consistent, the pattern would be the same.  But, for sanity, let’s say that the nodes are 1 mm apart, and that when V = 1 that is 1 volt.  We can then plot the radii of the resulting cylinders against applied voltage, V:
 
-[![1-volt-steps-graph](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/1-volt-steps-graph.png)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/1-volt-steps-graph.png) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/1-volt-steps-graph.png)
+![1-volt-steps-graph](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/1-volt-steps-graph.png)
 
 The result is not linear, unsurprisingly. But equally it is not all over the place, implying there will be a smooth radius reduction with increasing voltage.  The cubic equation on the graph is a best fit (the thin, barely visible, line on the graph).  There is no physical reason to expect a cubic (or any other polynomial) relationship between radius and voltage; I just wanted an empirical equation that could be used for prediction over the experimental range when it comes to trying to make more complicated shapes.
 
@@ -205,28 +197,25 @@ Our version of marching cubes is [here on Github](https://github.com/RepRapLtd/d
 
 * * * * *
 
-First attempt to print a controlled shape (8 October2019)
+First attempt to print a controlled shape (8 October 2019)
 ---------------------------------------------------------
-
-We now have a [Github repository for all the work on this project here](https://github.com/RepRapLtd/Electric3DPrinter).
 
 If we want to print a shape, one of the things it would be useful to know is the inverse of the graph immediately above.  That is to say, given a radius, what voltage should we apply to achieve it?  This is the inverse of the above graph together with its fitted cubic which tells us what voltage to apply to get what radius:
 
-[![radius-to-voltage](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/radius-to-voltage.png)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/radius-to-voltage.png) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/radius-to-voltage.png)
+![radius-to-voltage](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/radius-to-voltage.png)
 
 (Remember: the cubic is just an empirical fit to reproduce the curve; the coefficients have no physical significance.)
 
 Now, as the voltages in the simulation are switched to the ring of contacts round the reaction vessel, the voltage can be set by a very simple ray-trace calculation across an imagined shape in the middle of the vessel – a rectangular block, say.  The ray-trace gives the radius, and the radius gives the voltage to apply.  Here is the simulated printed result:
 
-[![printed-cuboid](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/printed-cuboid-266x300.png)](https://reprapltd.com/wp-content/uploads/2019/09/printed-cuboid.png) [](https://reprapltd.com/wp-content/uploads/2019/09/printed-cuboid.png)
+![printed-cuboid](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/printed-cuboid.png)
 
 It prints, as requested, a rectangular block (the transparent cylinder is the reaction vessel, as before).  The original block that was ray-traced had a square cross section 27x27x50 mm.  The printed block is 25.5×25.5×50 mm.  The slight reduction in size is possibly due to a cross-talk effect between higher and lower voltages, and layers influencing other layers above and below them.  But the block’s faces are remarkably flat.  The rounded corners are not a surprise, particularly given that the simulation only had a 50x50x50 node grid.
 
 The block that was ray-traced then printed above was the entire height of the reaction vessel.  Here is what is obtained if it is made shorter: 36mm high, placed 7mm up from the base of the reaction vessel, together with a 10mm diameter cylindrical stalk in the centre (which is rather like the support in conventional 3D printing needed to hold the object in place):
 
-[![printed-short-cuboid-with-stalk](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/printed-short-cuboid-with-stalk-1-257x300.png)](https://reprapltd.com/wp-content/uploads/2019/09/printed-short-cuboid-with-stalk-1.png) [](https://reprapltd.com/wp-content/uploads/2019/09/printed-short-cuboid-with-stalk-1.png)
+![printed-short-cuboid-with-stalk](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/printed-short-cuboid-with-stalk-1.png)
 
- 
 
 The original rectangular block that was ray-traced to create this is shown in transparent orange.  As you can see, I still haven’t fixed the occasional dud triangle in the marching cubes program…
 
