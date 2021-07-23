@@ -25,19 +25,19 @@ The Berkeley/Livermore system [thanks to [B. E. Kelly et al., *Science* 10.112
 
 Firstly, the Berkeley/Livermore system.  What they do is to shine a light pattern from a digital projector into a bath of liquid monomer that contains a photoinitiator.  Where a sufficient intensity of light falls, the monomer polymerises to form a solid.  So far this description is like a conventional low-cost SLA system; but the really clever bit is that they treat the 3D object to be printed as if it were a CT scan.  The light field is modulated in intensity as if it were (for example) X-rays passing through a patient on a scanner, and they rotate the scan so that ***a complete solid is formed in a single rotation in a matter of seconds***.  Computing the CT-scanner [Radon Transform](https://en.wikipedia.org/wiki/Radon_transform) of a 3D-printing STL file is mathematically and computationally straightforward (it’s essentially just like ray-tracing for computer graphics).  Neatly, their system does not need allowances to be made for refraction as the light enters the transparent rotating cylindrical bath containing the liquid monomer, because they submerge that in another bath that is rectangular, and so has flat faces for the light to pass through.
 
-[![spectra](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/spectra-300x238.jpg)](https://reprapltd.com/wp-content/uploads/2019/07/spectra.jpg) [](https://reprapltd.com/wp-content/uploads/2019/07/spectra.jpg)
+![spectra](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/spectra.jpg)
 
 A preliminary scan of lung cross-section by the Spectra system [thanks to the [Spectra Crowdfunder page](https://www.crowdsupply.com/mindseye-biomedical/spectra)].
 
 Secondly, the Spectra system. This is an alternative way of CT scanning that does not use X-rays, but instead uses electric current.  What they do is to place the object to be scanned in a bath of conducting liquid, and then apply a voltage from two small point-like electrodes on opposite sides of it and measure the current.  The current takes multiple paths through the liquid around and through the object to be scanned, of course.  But they then rotate the electrodes and repeat the measurement from a slightly different direction, just like rotating the X-ray source and the opposite detector in a conventional CT scanner.  By repeatedly doing this they can gather enough information to construct a cross section of the object being scanned.  By moving the electrodes at right angles to the cross section by a fraction of a millimetre and repeating the process they can make a stack of scans to digitise the scanned object as a full 3D solid.  In practice more than two electrodes are used, and the current is switched electronically between them; this reduces mechanical complexity and increases speed.
 
-[![electropolymerisation](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/electropolymerisation.jpg)](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/electropolymerisation.jpg) [](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/electropolymerisation.jpg)
+![electropolymerisation](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/electropolymerisation.jpg)
 
 Nanowires made on a surface by electropolymerisation; scale bar is 10 μm [thanks to the [Science Direct article on electropolymerisation](https://www.sciencedirect.com/topics/materials-science/electropolymerization)].
 
 Thirdly, Electropolymerisation.  The clue here is in the name – this is causing a liquid monomer to polymerise to a solid by passing electricity through it rather than light (or other forms of energy).
 
-[![eprint](The%20Electric%203D%20Printer%20_%20RepRap%20Ltd_files/eprint600-300x300.png)](https://reprapltd.com/wp-content/uploads/2019/07/eprint600.png) [](https://reprapltd.com/wp-content/uploads/2019/07/eprint600.png)
+[eprint](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/eprint600.png)
 
 The Electric 3D Printing system proposed here.
 
@@ -51,13 +51,8 @@ Finally, and very speculatively, an even more ambitious possibility would be to 
 
 But if it could be made to work, we could then 3D-print a complete solid copper object at room temperature.  Or, for that matter, a titanium one…
 
- 
-
- 
 
 * * * * *
-
- 
 
 2 Dimensional Simulation (1 August 2019)
 ----------------------------------------
@@ -76,11 +71,11 @@ The model does not start with a shape that is to be printed and try to work out 
 
 Let V be the potentials over the disc, and E be the field.  Then Laplace’s simplification of Poisson’s equation
 
-∇<sup>2</sup>V=0,
+<centre>∇<sup>2</sup><em>V</em>=0,</centre>
 
-when solved gives V, and E can then be found from
+when solved gives <em>V</em>, and <em>E</em> can then be found from
 
-E=−∇V.
+<centre><em>E</em>=−∇<em>V</em>.</centre>
 
 The current through any node will be proportional to the magnitude of the vector *E* at that node.  Integrate that current over the time of the whole simulation, and you have the total charge that has run through that node, which should decide if it sets solid or not.
 
