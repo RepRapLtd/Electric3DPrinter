@@ -71,11 +71,11 @@ The model does not start with a shape that is to be printed and try to work out 
 
 Let V be the potentials over the disc, and E be the field.  Then Laplace’s simplification of Poisson’s equation
 
-<centre>∇<sup>2</sup><em>V</em>=0,</centre>
+<center>∇<sup>2</sup><em>V</em>=0,</center>
 
 when solved gives <em>V</em>, and <em>E</em> can then be found from
 
-<centre><em>E</em>=−∇<em>V</em>.</centre>
+<center><em>E</em>=−∇<em>V</em>.</center>
 
 The current through any node will be proportional to the magnitude of the vector *E* at that node.  Integrate that current over the time of the whole simulation, and you have the total charge that has run through that node, which should decide if it sets solid or not.
 
