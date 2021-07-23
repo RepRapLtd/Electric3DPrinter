@@ -237,7 +237,9 @@ After a year and a half gap (caused, *inter alia*, by the covid pandemic) I have
 
 I have written a Python wrapper for the C++ partial-differential-equation solver that works out the printed shapes. It's in the Software/GAN directory of this repository.
 
-What it does is to generate a list of pairs of electrodes on the cylindrical boundary of the reaction vessel of the Electric 3D Printer and then assign random voltages to each pair. These are then fed into the solver, and the output of that is read back into the Python program to be subjected to the marching cubes algorithm to see what the pattern prints. Here is an example of the sort of thing that results; a lumpy cylinder:
+What it does is to generate a list of pairs of electrodes on the cylindrical boundary of the reaction vessel of the Electric 3D Printer and then assign random voltages to each pair. These are then fed into the solver, and the output of that is read back into the Python program to be subjected to the marching cubes algorithm to see what the pattern prints. The system now uses the standard Python version of marching cubes, **import mcubes**, to generate the shapes from the charge integrals, which works a lot better, incidentally.
+
+Here is an example of the sort of thing that results; a lumpy cylinder:
 
 ![lumpy-cylinder](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/lumpy.png)
 
@@ -248,6 +250,12 @@ For this the pairs of electrodes were distributed at random. To get an idea of w
 And here is the same shape with a set of straight lines superimposed on it that join the pairs of electrodes that created it:
 
 ![lumpy-cylinder-hedgehog](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/lumpy2hedgehog.png)
+
+Because fewer electrodes were used, and consequently less current was passed through the volume, more of the shape has remained solid, in some cases right out to the boundary.
+
+But why do we get a cylinder-like shape extending the length of the reaction chamber? In part, this is because that's the shape of the chamber, and what we're doing is to erode away inside it. But also, consider a slice across the cylinder to make a disc:
+
+![disc-chords](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/disc-cords.png)
 
 * * * * *
 
