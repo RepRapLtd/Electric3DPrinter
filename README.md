@@ -71,7 +71,7 @@ The model does not start with a shape that is to be printed and try to work out 
 
 Let V be the potentials over the disc, and E be the field.  Then Laplace’s simplification of Poisson’s equation
 
-<center>∇<sup>2</sup><em>V</em>=0,</center>
+<div align="center">∇<sup>2</sup><em>V</em>=0,</div>
 
 when solved gives <em>V</em>, and <em>E</em> can then be found from
 
