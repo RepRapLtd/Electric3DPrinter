@@ -19,19 +19,25 @@ The invention combines three ideas to make a fourth.  The three are:
 
 My overall synthesis of the three is to use an electric current to make a liquid plastic monomer polymerise to a solid in such a way that it forms a 3-dimensional object with a specified shape, and to do that with a single scan in a time of (I hope…) a few seconds.  Let me start by describing the three precursor technologies in more detail:
 
+<div align="center">
 ![Berkeley Livermore Process](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/berkeley-livermore-process.jpg)
 
 The Berkeley/Livermore system [thanks to [B. E. Kelly et al., *Science* 10.1126/science.aau7114 (2019)](https://science.sciencemag.org/content/363/6431/1075)].
+</div>
 
 Firstly, the Berkeley/Livermore system.  What they do is to shine a light pattern from a digital projector into a bath of liquid monomer that contains a photoinitiator.  Where a sufficient intensity of light falls, the monomer polymerises to form a solid.  So far this description is like a conventional low-cost SLA system; but the really clever bit is that they treat the 3D object to be printed as if it were a CT scan.  The light field is modulated in intensity as if it were (for example) X-rays passing through a patient on a scanner, and they rotate the scan so that ***a complete solid is formed in a single rotation in a matter of seconds***.  Computing the CT-scanner [Radon Transform](https://en.wikipedia.org/wiki/Radon_transform) of a 3D-printing STL file is mathematically and computationally straightforward (it’s essentially just like ray-tracing for computer graphics).  Neatly, their system does not need allowances to be made for refraction as the light enters the transparent rotating cylindrical bath containing the liquid monomer, because they submerge that in another bath that is rectangular, and so has flat faces for the light to pass through.
 
+<div align="center">
 ![spectra](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/spectra.jpg)
+</div>
 
 A preliminary scan of lung cross-section by the Spectra system [thanks to the [Spectra Crowdfunder page](https://www.crowdsupply.com/mindseye-biomedical/spectra)].
 
 Secondly, the Spectra system. This is an alternative way of CT scanning that does not use X-rays, but instead uses electric current.  What they do is to place the object to be scanned in a bath of conducting liquid, and then apply a voltage from two small point-like electrodes on opposite sides of it and measure the current.  The current takes multiple paths through the liquid around and through the object to be scanned, of course.  But they then rotate the electrodes and repeat the measurement from a slightly different direction, just like rotating the X-ray source and the opposite detector in a conventional CT scanner.  By repeatedly doing this they can gather enough information to construct a cross section of the object being scanned.  By moving the electrodes at right angles to the cross section by a fraction of a millimetre and repeating the process they can make a stack of scans to digitise the scanned object as a full 3D solid.  In practice more than two electrodes are used, and the current is switched electronically between them; this reduces mechanical complexity and increases speed.
 
+<div align="center">
 ![electropolymerisation](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/electropolymerisation.jpg)
+</div>
 
 Nanowires made on a surface by electropolymerisation; scale bar is 10 μm [thanks to the [Science Direct article on electropolymerisation](https://www.sciencedirect.com/topics/materials-science/electropolymerization)].
 
@@ -97,7 +103,7 @@ Field magnitude, |*E*|, over the disc.
 
 As mentioned above, the current flowing through each node will be proportional to the value of the magnitude of *E* at the node.  The currents are, as would be expected, greatest at the electrodes.  But I was encouraged by the slope in the middle of the plot of the potentials, which corresponds to the non-zero plateau in the middle of the field magnitude plot.  I thought that if one were to pass a series of currents from the electrodes as they were energised round the circle the sum of charges in the middle might exceed that at the individual electrodes, and so one would have built a solid disc in the middle and left liquid monomer round the outsides.  Unfortunately, this did not happen.  Here is the result of energising twenty pairs of electrodes in sequence and integrating the currents flowing through all the nodes for each one:
 
-[[sum-of-charges](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/sum-of-charges.png)
+![sum-of-charges](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/sum-of-charges.png)
 
 Integral of the current from twenty electrodes energised sequentially round the disc.
 
@@ -120,7 +126,7 @@ Obviously (after two days of thought…) if the machine prints solid where you d
 
 Remember Loctite:
 
-[[loctight](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/loctight.jpg)
+![loctight](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/loctight.jpg)
 
 This is a remarkable material that polymerises solid except in the presence of oxygen, which keeps it monomeric.  Thus when you tighten a nut and bolt with liquid Loctite on the threads this excludes the oxygen, solidifies the Loctite, and locks the nut to the bolt.  Loosen them a bit to allow the oxygen back in, and the polymer depolymerises back to a liquid, and the threads can be undone easily because the reaction is also reversible.  (The – possibly apocryphal – story is that Vernon Krieble, the inventor of Loctite, had greater difficulty making a bottle that would allow oxygen to permeate in to keep the stuff liquid than he did making Loctite itself.)
 
@@ -129,6 +135,7 @@ Let’s suppose that we can make a monomer that behaves like Loctite, but in whi
 The transition from solid to liquid with charge integral would not be instant.  For this simulation I propose a sigmoid function, as I mentioned above:
 
 ![sigmoid](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/sigmoid.png)
+
  *f*(*x*)=1–*e*<sup>*a*(*x–b*)</sup>/(*e*<sup>*a*(*x–b*)</sup>+1)
 
 Ignore the negative bit of the abscissa; that’s just there for me to check things are correct; you can’t have negative charge integral just as you can’t have -3 apples. The variables *a* and *b* alter the shape and offset to the right of the sigmoid function and can be played around with in the simulation to experiment, or maybe one day to match the characteristics of a real polymer.  The charge integral (the last surface plot above) was normalised to lie in the range [0, 1].  That is the value of *x* in the sigmoid function.  The vertical axis is degree of polymerisation: 0 charge gives solid, and the (at the moment hypothetical) material liquifies as charge integral increases to the right, going fully liquid at a value around 0.2.  Note at this stage these numbers aren’t real coulombs; they would be, however, proportional to real coulombs in a real machine. (The values *a* = 50 and *b* = 0.1 were used for this, incidentally.)
@@ -168,8 +175,8 @@ Sorry for the odd flaky triangle in the image (to be fixed).  Converting the a
 
 * * * * *
 
-The Effect of More Voltage or Longer Accumulated Charge (13 September)
-----------------------------------------------------------------------
+The Effect of More Voltage or Longer Accumulated Charge (13 September 2019)
+---------------------------------------------------------------------------
 
 I ran a series of tests to make cylinders like the one above, increasing the voltage applied to the electrodes, which we would expect to reduce the diameter of the resulting cylinder.  Here is the result:
 
