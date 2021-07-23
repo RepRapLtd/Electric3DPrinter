@@ -63,6 +63,7 @@ def RoughlyOppositeBoundaryPair(boundary):
  b = a + round(len/2) + b
  b = b%len
  return (boundary[a], boundary[b])
+ #return(RandomBoundaryPoint(boundary), RandomBoundaryPoint(boundary))
 
 # This attempts to put more electrodes at the Z extremes, to try to reduce end
 # effects and make a blob in the middle. Sort of works...
@@ -117,4 +118,4 @@ def RunASimulation(name, voltages, endCount, endDepth):
 
 
 random.seed(a=None, version=2)
-RunASimulation("t2", 100, 50, 10)
+RunASimulation("t2", 1, 100, 1)

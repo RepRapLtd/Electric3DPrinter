@@ -255,7 +255,9 @@ Because fewer electrodes were used, and consequently less current was passed thr
 
 But why do we get a cylinder-like shape extending the length of the reaction chamber? In part, this is because that's the shape of the chamber, and what we're doing is to erode away inside it. But also, consider a slice across the cylinder to make a disc:
 
-![disc-chords](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/disc-cords.png)
+![disc-chords](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/disc-chords.png)
+
+If we choose 100 pairs of random points from the uniform distribution over the circumference then draw the chords between them, this is what we get. As you can see, the density round the edges is higher than in the middle for the intuitively obvious reason: a random pair of points are not all that likely to be roughly diametrically opposite each other. This is what's going on in three dimensions as well, and is another reason that we tend to make roughly cylindrical shapes in the middle.
 
 * * * * *
 
