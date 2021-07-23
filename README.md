@@ -269,7 +269,7 @@ When all this is working we will have a means to train an ordinary neural networ
 
 How will the first stage work? We can generate random input patterns (the pairs of charged electrodes), and we know the shape of the result (the output of the C++ program that solves the P.D.E.). What we want for a given output shape (an STL file, say) is to know the pattern of electrode voltages that will create it. So we can make a training data set as big as we like, albeit random, and hope that a network trained on it will be able to make regular shapes as well.
 
-The next stage is to get the voltage distributions right to make blobs, not cylinders, then we will move on to the
+The next stage is to get the voltage distributions right to make blobs, not cylinders, then we will move on to the neural network training.
 
 * * * * *
 
