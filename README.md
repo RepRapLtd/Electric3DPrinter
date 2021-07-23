@@ -1,23 +1,10 @@
 The RepRap Ltd Electric 3D Printer
 ==================================
 
-This paper is a log of a RepRap Ltd ongoing research project to create a completely new type of 3D printer invented by [Adrian Bowyer](https://reprapltd.com/about/) (to whom “I” below refers…).
+This document is a log of a RepRap Ltd ongoing research project to create a completely new type of 3D printer invented by [Adrian Bowyer](https://reprapltd.com/about/) (to whom “I” below refers…).
 
-(As with our other documentation, clicking on an image should bring up a larger version.)
+(All the images here are in the Pix directory of this repository.)
 
--   [The Initial Invention (25 July 2019)](https://reprapltd.com/documentation/the-electric-3d-printer/#The_InitialInvention_25_July_2019)
-
--   [2 Dimensional Simulation (1 August 2019)](https://reprapltd.com/documentation/the-electric-3d-printer/#2Dimensional_Simulation_1_August_2019)
-
--   [2 Dimensional Simulation of Actual Printing (10 August 2019)](https://reprapltd.com/documentation/the-electric-3d-printer/#2_Dimensional_Simulation_of_Actual_Printing_10_August_2019)
-
--   [3 Dimensional Simulation (13 August 2019)](https://reprapltd.com/documentation/the-electric-3d-printer/#3_Dimensional_Simulation_13_August_2019)
-
--   [The Effect of More Voltage or Longer Accumulated Charge (13 September)](https://reprapltd.com/documentation/the-electric-3d-printer/#The_Effect_of_More_Voltage_or_Longer_Accumulated_Charge_13_September)
-
--   [First attempt to print a controlled shape (8 October2019)](https://reprapltd.com/documentation/the-electric-3d-printer/#First_attempt_to_print_a_controlled_shape_8_October2019)
-
--   [References and Bibliography](https://reprapltd.com/documentation/the-electric-3d-printer/#References_and_Bibliography)
 
 The Initial Invention (25 July 2019)
 ------------------------------------
@@ -31,7 +18,8 @@ The invention combines three ideas to make a fourth.  The three are:
 3.  [Electropolymerisation](https://www.sciencedirect.com/topics/materials-science/electropolymerization).
 
 My overall synthesis of the three is to use an electric current to make a liquid plastic monomer polymerise to a solid in such a way that it forms a 3-dimensional object with a specified shape, and to do that with a single scan in a time of (I hope…) a few seconds.  Let me start by describing the three precursor technologies in more detail:
- ![Berkeley Livermore Process](https://reprapltd.com/wp-content/uploads/2019/07/berkeley-livermore-process.jpg) [](https://reprapltd.com/wp-content/uploads/2019/07/berkeley-livermore-process.jpg)
+
+![Berkeley Livermore Process](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/berkeley-livermore-process.jpg)
 
 The Berkeley/Livermore system [thanks to [B. E. Kelly et al., *Science* 10.1126/science.aau7114 (2019)](https://science.sciencemag.org/content/363/6431/1075)].
 
