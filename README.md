@@ -71,7 +71,7 @@ To try this out I decided to start by simulating it, which is to say I’ve writ
 
 The model does not start with a shape that is to be printed and try to work out the pattern of voltage changes that would need to be made to create that shape.  This would have to be done for the actual machine, but – before doing that – I decided just to apply patterns of voltages that seem as if they might make something sensible (like a cylinder in the middle) and see what they would actually do.  This is much simpler than doing the backward calculation from the final desired shape.
 
-Let V be the potentials over the disc, and E be the field.  Then Laplace’s simplification of Poisson’s equation
+Let V be the potentials over the disc, and E be the field.  Then Laplace’s simplification of Poisson’s partial differential equation (P.D.E.):
 
 <div align="center">∇<sup>2</sup><em>V</em>=0,</div>
 
@@ -107,7 +107,7 @@ The jagged periphery is an aliasing effect from the grid, and doesn’t matter a
 
 This is discouraging.  But it is only the simplest possible simulation of the simplest possible pattern of currents.  There are many variables that I have not altered, such as different voltages at different electrodes (they don’t all have to be either off or on), different persistence times for one pattern, *V*, and fading dynamically between voltage patterns at the electrodes.  Now I have the basic simulation written all these will be easy to experiment with.
 
-If these experiments can be made to produce more hopeful results, then I will change the simulation to full 3D rather than the 2D disc.  This is straightforward as it just means adding a*z* term to the partial differential equation along the cylinder axis and then solving in the entire cylindrical volume, rather than just a disc slice of it.  Visualising the results will be rather like visualising a CT scan – a solid contour in the volume of constant charge integral would be triangulated and plotted in 3D.
+If these experiments can be made to produce more hopeful results, then I will change the simulation to full 3D rather than the 2D disc.  This is straightforward as it just means adding a*z* term to the P.D.E. along the cylinder axis and then solving in the entire cylindrical volume, rather than just a disc slice of it.  Visualising the results will be rather like visualising a CT scan – a solid contour in the volume of constant charge integral would be triangulated and plotted in 3D.
 
 * * * * *
 
@@ -235,7 +235,7 @@ Printing random(ish) shapes and deep learning (23 July 2021)
 
 After a year-and-a-half gap (caused, *inter alia*, by the covid pandemic) I have come back to this project.  I've set it up to "print" random shapes in a way I shall immediately describe. But what use are random shapes? They can be used to train a neural network to generate shapes that are not random automatically. I shall outline my proposal for that at the end of this section.
 
-I have written a Python wrapper for the C++ partial-differential-equation solver that works out the printed shapes. It's in the Software/GAN directory of this repository.
+I have written a Python wrapper for the C++ P.D.E. solver that works out the printed shapes. It's in the Software/GAN directory of this repository.
 
 What it does is to generate a list of pairs of electrodes on the cylindrical boundary of the reaction vessel of the Electric 3D Printer and then assign random voltages to each pair. These are then fed into the solver, and the output of that is read back into the Python program to be subjected to the marching cubes algorithm to see what the pattern prints. The system now uses the standard Python version of marching cubes, **import mcubes**, to generate the shapes from the charge integrals, which works a lot better, incidentally.
 
@@ -269,7 +269,7 @@ When all this is working we will have a means to train an ordinary neural networ
 
 How will the first stage work? We can generate random input patterns (the pairs of charged electrodes), and we know the shape of the result (the output of the C++ program that solves the P.D.E.). What we want for a given output shape (an STL file, say) is to know the pattern of electrode voltages that will create it. So we can make a training data set as big as we like, albeit random, and hope that a network trained on it will be able to make regular shapes as well.
 
-The next stage is to get the voltage distributions right to make blobs, not cylinders, then we will move on to the neural networks.
+The next stage is to get the voltage distributions right to make blobs, not cylinders, then we will move on to the
 
 * * * * *
 
