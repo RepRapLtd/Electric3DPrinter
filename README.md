@@ -233,7 +233,7 @@ I think that will be the next step.
 Printing random(ish) shapes and deep learning (23 July 2021)
 ------------------------------------------------------------
 
-After a year and a half gap (caused, *inter alia*, by the covid pandemic) I have come back to this project.
+After a year-and-a-half gap (caused, *inter alia*, by the covid pandemic) I have come back to this project.  I've set it up to "print" random shapes in a way I shall immediately describe. But what use are random shapes? They can be used to train a neural network to generate shapes that are not random automatically. I shall outline my proposal for that at the end of this section.
 
 I have written a Python wrapper for the C++ partial-differential-equation solver that works out the printed shapes. It's in the Software/GAN directory of this repository.
 
@@ -257,14 +257,26 @@ But why do we get a cylinder-like shape extending the length of the reaction cha
 
 ![disc-chords](https://github.com/RepRapLtd/Electric3DPrinter/blob/main/Pix/disc-chords.png)
 
-If we choose 100 pairs of random points from the uniform distribution over the circumference then draw the chords between them, this is what we get. As you can see, the density round the edges is higher than in the middle for the intuitively obvious reason: a random pair of points are not all that likely to be roughly diametrically opposite each other. This is what's going on in three dimensions as well, and is another reason that we tend to make roughly cylindrical shapes in the middle.
+If we choose 100 pairs of random points from the uniform distribution over the circumference then draw the chords between them, this is what we get. As you can see, the density round the edges is higher than in the middle for the intuitively obvious reason: a random pair of points are not all that likely to be more or less diametrically opposite each other. This is what's going on in three dimensions as well, and is another reason that we tend to make roughly cylindrical shapes in the middle.
+
+But we don't just want to make cylinders and prisms. The physics of the process is introducing a bias into the process and, if we can quantify that bias, we can apply its inverse in an attempt to correct it. In fact I have started to do that in the two solids at the start of this section. The electrode pairs were not chosen from the uniform distribution over the surface of the cylindrical reaction chamber. They were biased towards the top or bottom, and biased to be more likely to be near to diameters than random chords would be. This is the reason that the solids have bulges around half way up the cylinder.
+
+It is easy to generate pseudo-random numbers from any distribution we like. You just integrate the distribution function to get the corresponding cumulative distribution function (CDF), then invert this to get random points from the desired distribution. That is to say you feed uniformly distributed random numbers into the *y* axis of the CDF and the resulting *x* values will be from the desired distribution.
+
+I shall shortly add a couple of functions to the Python program that generates the voltage patterns to allow any distribution to be specified by points along it. Simpson's Rule will then be used to make the CDF, and the inverse of that will give the randomness required. The aim will be to print random blobs in the middle, not cylinders.
+
+When all this is working we will have a means to train an ordinary neural network to generate the pattern of voltages needed to print a given input shape. But it should also be possible to use that to make a [Generative Adversarial Neural-Network](https://realpython.com/generative-adversarial-networks/) to create all sorts of useful engineering shapes automatically.
+
+How will the first stage work? We can generate random input patterns (the pairs of charged electrodes), and we know the shape of the result (the output of the C++ program that solves the P.D.E.). What we want for a given output shape (an STL file, say) is to know the pattern of electrode voltages that will create it. So we can make a training data set as big as we like, albeit random, and hope that a network trained on it will be able to make regular shapes as well.
+
+The next stage is to get the voltage distributions right to make blobs, not cylinders, then we will move on to the neural networks.
 
 * * * * *
 
 References and Bibliography
 ---------------------------
 
-B. E. Kelly *et al*., Volumetric additive manufacturing via tomographic reconstruction[, *Science* 10.1126/science.aau7114 (2019)](https://science.sciencemag.org/content/363/6431/1075)
+B. E. Kelly *et al*., Volumetric additive manufacturing via tomographic reconstruction, [*Science* 10.1126/science.aau7114 (2019)](https://science.sciencemag.org/content/363/6431/1075)
 
 Spectra Scanner Documentation [https://openeit.github.io/docs/html/index.html](https://openeit.github.io/docs/html/index.html)
 
