@@ -46,6 +46,8 @@
 #include <string>
 #include <numeric>
 #include <ctime>
+#include <algorithm>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -616,7 +618,7 @@ void Output(const char* fileName, const double a[nodes+2][nodes+2][nodes+2], con
 // Output the tensor to file fileName that is the entire mesh so that a 3D iso-surface STL file
 // can be generated from it.
 
-void OutputTensor(const char* fileName, const double a[nodes+2][nodes+2][nodes+2])
+void OutputTensor(const char* fileName, const double a[nodes+2][nodes+2][nodes+2], const bool report)
 {
 	// Find the maximum and minimum values.
 	// Assume the central point is active...
@@ -641,7 +643,7 @@ void OutputTensor(const char* fileName, const double a[nodes+2][nodes+2][nodes+2
 		}
 	}
 
-	cout << "Tensor minimum and maximum: " << minValue << ", " << maxValue << endl;
+	if(report) cout << "Tensor minimum and maximum: " << minValue << ", " << maxValue << endl;
 
 	ofstream outputFile;
 	outputFile.open(fileName);
@@ -727,7 +729,7 @@ void TestCylinder(const int r, const int z0, const int z1)
 			}
 		}
 	}
-	OutputTensor("testCylinder.tns", thresholdedChargeIntegral);
+	OutputTensor("testCylinder.tns", thresholdedChargeIntegral, true);
 }
 
 // Remind the user what they can do.
@@ -755,7 +757,7 @@ void Control()
 		switch(c)
 		{
 		case 't':
-			OutputTensor("thresholdTensor.tns", thresholdedChargeIntegral);
+			OutputTensor("thresholdTensor.tns", thresholdedChargeIntegral, true);
 			break;
 
 		case 's':
@@ -815,7 +817,7 @@ bool SetBoundary(ifstream& voltageFile)
 	return true;
 }
 
-void RunFromVoltagePattern(const char* vFileName, const char* tFileName)
+void RunFromVoltagePattern(const char* vFileName, const char* tFileName, const double sigmoidOffset, const double sigmoidMultiplier, const bool report)
 {
 	ifstream voltageFile;
 	voltageFile.open(vFileName);
@@ -833,14 +835,14 @@ void RunFromVoltagePattern(const char* vFileName, const char* tFileName)
 			GausSeidelIteration();
 			GradientMagnitudes();
 			count++;
-			if(!(count%50))
+			if(!(count%50) && report)
 			{
 				cout << "At " << count << " voltage file line." << endl;
 			}
 	}
-	SigmoidCharge(0.0, 50);
+	SigmoidCharge(sigmoidOffset, sigmoidMultiplier);
 
-	OutputTensor(tFileName, thresholdedChargeIntegral);
+	OutputTensor(tFileName, thresholdedChargeIntegral, report);
 }
 
 void SaveBoundary(const char* bFileName)
@@ -857,20 +859,70 @@ void SaveBoundary(const char* bFileName)
 	boundaryFile.close();
 }
 
+
+char* getCmdOption(char ** begin, char ** end, const std::string & option)
+{
+    char ** itr = std::find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+        return *itr;
+    }
+    return 0;
+}
+
+
+bool cmdOptionExists(char** begin, char** end, const std::string& option)
+{
+    return std::find(begin, end, option) != end;
+}
+
+void ArgumentsInvalid()
+{
+	cout << "Electric 3D printer simulation error - wrong arguments: Electric3DPrinter -i voltagefile -o tensorfile [-so sigmoidOffset] [-sm sigmoidMultiplier] [-quiet]" << endl;
+	exit(1);
+}
+
 // Self-explanatory, I hope.
 
 int main(int argc, char *argv[])
 {
-	if(argc != 3)
-	{
-		cout << "Electric 3D printer simulation error - wrong arguments." << endl;
-		exit(1);
-	}
 	struct timespec t_start, t_end;
 	clock_gettime(CLOCK_MONOTONIC, &t_start);
 
+	double sigmoidOffset = 0.0;
+	double sigmoidMultiplier = 50.0;
+
+	bool report = !cmdOptionExists(argv, argv + argc, "-quiet");
+
+	char* inputFileName = getCmdOption(argv, argv + argc, "-i");
+	if(!inputFileName)
+		ArgumentsInvalid();
+	else if(report)
+		cout << "Reading voltages from " << inputFileName << endl;
+
+	char* outputFileName = getCmdOption(argv, argv + argc, "-o");
+	if(!outputFileName)
+		ArgumentsInvalid();
+	else if(report)
+		cout << "Writing tensor to " << outputFileName << endl;
+
+	char* so = getCmdOption(argv, argv + argc, "-so");
+	if(so)
+	{
+		sigmoidOffset = strtod(so, 0);
+		if(report) cout << "sigmoidOffset set to " << sigmoidOffset << endl;
+	}
+
+	char* sm = getCmdOption(argv, argv + argc, "-sm");
+	if(sm)
+	{
+		sigmoidMultiplier = strtod(sm, 0);
+		if(report) cout << "sigmoidMultiplier set to " << sigmoidMultiplier << endl;
+	}
+
+
 	//OutputVoltagePattern("voltagefile.v");
-	RunFromVoltagePattern(argv[1], argv[2]);
+	RunFromVoltagePattern(inputFileName, outputFileName, sigmoidOffset, sigmoidMultiplier, report);
 	//SaveBoundary("boundaryNodes.txt");
 
 	clock_gettime(CLOCK_MONOTONIC, &t_end);
