@@ -112,10 +112,10 @@ def CreateVoltages(fileName, voltages, endCount, endDepth):
 
 def RunASimulation(name, voltages, endCount, endDepth):
  CreateVoltages(name + ".v", voltages, endCount, endDepth)
- subprocess.run(["./Electric3DPrinter", "-i", name + ".v", "-o", name + ".tns", "-so", "0.0", "-sm", "50.0"])
+ subprocess.run(["./Electric3DPrinter", "-i", name + ".v", "-o", name + ".tns", "-so", "-0.1", "-sm", "50.0"])
  print("C++ simulation run")
  ExportMesh(name + ".tns", name + ".obj")
 
 
 random.seed(a=None, version=2)
-RunASimulation("t2", 1, 100, 1)
+RunASimulation("t2", 1, 1000, 3)
