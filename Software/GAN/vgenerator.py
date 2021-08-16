@@ -52,36 +52,37 @@ def LoadBoundary(fileName):
   boundary.append([x, y])
  return boundary
 
-def RandomBoundaryPoint(boundary):
- return random.choice(boundary)
+def RandomBoundaryIndex(boundary):
+ return random.randrange(0, boundary.__len__())
 
-def RoughlyOppositeBoundaryPair(boundary):
+# Return two indices into the boundary array that are roughly opposite
+# TODO - remove constants
+
+def RoughlyOppositeBoundaryIndices(boundary):
  len = boundary.__len__()
- a = random.randint(0, len-1)
+ a = random.randrange(0, len)
  b = random.randint(0, round(len/5))
  b = b - round(len/10)
  b = a + round(len/2) + b
  b = b%len
  return (a, b)
- #return(RandomBoundaryPoint(boundary), RandomBoundaryPoint(boundary))
 
-# This attempts to put more electrodes at the Z extremes, to try to reduce end
+# This attempts to use more electrodes at the Z extremes, to try to reduce end
 # effects and make a blob in the middle. Sort of works...
 
 def RandomZ(bottom, span):
- y = random.random()
- if y < 0.5:
-  x = 2*y*y
- else:
-  x = 0.5 + maths.sqrt((y - 0.5)*0.5)
- return bottom + int(x*span)
+# y = random.random()
+# if y < 0.5:
+#  x = 2*y*y
+# else:
+#  x = 0.5 + maths.sqrt((y - 0.5)*0.5)
+# return bottom + int(x*span)
+ return random.randint(bottom, bottom+span)
 
 def RandomVoltage():
  return 50 + random.random()*50.0
 
-# CHECK ALL THIS!!! TOO MUCH INDIRECTION FOR BRAIN!!!
-
-def SingleShotToFile(file, ends):
+def ElectrodePairToFile(file, ends):
  s = ""
  for end in range(2):
   for number in range(4):
@@ -93,45 +94,45 @@ def SingleShotToFile(file, ends):
 
 def TopAndBottomFill(file, boundary, endCount, endDepth):
  for l in range(endCount):
-  b = RoughlyOppositeBoundaryPair(boundary)
-  b0 = boundary[b[0]]
-  b1 = boundary[b[1]]
+  oppositeBoundaryIndices = RoughlyOppositeBoundaryIndices(boundary)
+  boundaryPoint0 = boundary[oppositeBoundaryIndices[0]]
+  boundatryPoint1 = boundary[oppositeBoundaryIndices[1]]
   end = []
   ends = []
-  end.append(b0[0])
-  end.append(b0[1])
+  end.append(boundaryPoint0[0])
+  end.append(boundaryPoint0[1])
   end.append(RandomZ(1, endDepth))
   end.append(RandomVoltage())
   ends.append(end)
   end = []
-  end.append(b1[0])
-  end.append(b1[1])
+  end.append(boundatryPoint1[0])
+  end.append(boundatryPoint1[1])
   end.append(RandomZ(1, endDepth))
   end.append(-RandomVoltage())
   ends.append(end)
-  SingleShotToFile(file, ends)
+  ElectrodePairToFile(file, ends)
  for l in range(endCount):
-  b = RoughlyOppositeBoundaryPair(boundary)
-  b0 = boundary[b[0]]
-  b1 = boundary[b[1]]
+  oppositeBoundaryIndices = RoughlyOppositeBoundaryIndices(boundary)
+  boundaryPoint0 = boundary[oppositeBoundaryIndices[0]]
+  boundatryPoint1 = boundary[oppositeBoundaryIndices[1]]
   end = []
   ends = []
-  end.append(b0[0])
-  end.append(b0[1])
+  end.append(boundaryPoint0[0])
+  end.append(boundaryPoint0[1])
   end.append(RandomZ(51 - endDepth, endDepth))
   end.append(RandomVoltage())
   ends.append(end)
   end = []
-  end.append(b1[0])
-  end.append(b1[1])
+  end.append(boundatryPoint1[0])
+  end.append(boundatryPoint1[1])
   end.append(RandomZ(51 - endDepth, endDepth))
   end.append(-RandomVoltage())
   ends.append(end)
-  SingleShotToFile(file, ends)
+  ElectrodePairToFile(file, ends)
 
 def MakeHole(file, boundary, voltages, diameter):
  len = boundary.__len__()
- b = RoughlyOppositeBoundaryPair(boundary)
+ b = RoughlyOppositeBoundaryIndices(boundary)
  z0 = RandomZ(1, 51)
  z1 = RandomZ(1, 51)
  for v in range(voltages):
@@ -146,14 +147,14 @@ def MakeHole(file, boundary, voltages, diameter):
   end.append(RandomZ(1, 51))
   end.append(RandomVoltage())
   ends.append(end)
-  b = RandomBoundaryPoint(boundary)
+  b = RandomBoundaryIndex(boundary)
   end = []
   end.append(b[0])
   end.append(b[1])
   end.append(RandomZ(1, 51))
   end.append(-RandomVoltage())
   ends.append(end)
-  SingleShotToFile(file, ends)
+  ElectrodePairToFile(file, ends)
 
 
 
@@ -162,22 +163,22 @@ def CreateVoltages(fileName, voltages, endCount, endDepth):
  file = open(fileName, "w")
  TopAndBottomFill(file, boundary, endCount, endDepth)
  for l in range(voltages):
-  b = RandomBoundaryPoint(boundary)
+  boundaryIndex = RandomBoundaryIndex(boundary)
   end = []
   ends = []
-  end.append(boundary[b[0]])
-  end.append(boundary[b[1]])
+  end.append(boundary[boundaryIndex][0])
+  end.append(boundary[boundaryIndex][1])
   end.append(RandomZ(1, 51))
   end.append(RandomVoltage())
   ends.append(end)
-  b = RandomBoundaryPoint(boundary)
+  boundaryIndex = RandomBoundaryIndex(boundary)
   end = []
-  end.append(boundary[b[0]])
-  end.append(boundary[b[1]])
+  end.append(boundary[boundaryIndex][0])
+  end.append(boundary[boundaryIndex][1])
   end.append(RandomZ(1, 51))
   end.append(-RandomVoltage())
   ends.append(end)
-  SingleShotToFile(file, ends)
+  ElectrodePairToFile(file, ends)
  file.write("-1 -1 -1 -1 -1 -1 -1 -1\n")
  print("Voltage file created")
  file.close()
@@ -189,5 +190,5 @@ def RunASimulation(name, voltages, endCount, endDepth):
  ExportMesh(name + ".tns", name + ".obj")
 
 
-random.seed(a=None, version=2)
+random.seed(a=97)
 RunASimulation("t2", 200, 1000, 5)
