@@ -132,26 +132,25 @@ def TopAndBottomFill(file, boundary, endCount, endDepth):
 
 def MakeHole(file, boundary, voltages, diameter):
  len = boundary.__len__()
- b = RoughlyOppositeBoundaryIndices(boundary)
- z0 = RandomZ(1, 51)
- z1 = RandomZ(1, 51)
+ oppositeBoundaryIndices = RoughlyOppositeBoundaryIndices(boundary)
+ zCentre0 = RandomZ(1, 51)
+ zCentre1 = RandomZ(1, 51)
  for v in range(voltages):
-  b0 = (b[0] + random.randrange(-diameter, diameter)) % len
-  b1 = (b[1] + random.randrange(-diameter, diameter)) % len
-  z00 = (z0 + random.randrange(-diameter, diameter)) % 51
-  z11 = (z1 + random.randrange(-diameter, diameter)) % 51
+  endIndex0 = (oppositeBoundaryIndices[0] + random.randrange(-diameter, diameter)) % len
+  endIndex1 = (oppositeBoundaryIndices[1] + random.randrange(-diameter, diameter)) % len
+  z0 = (zCentre0 + random.randrange(-diameter, diameter)) % 51
+  z1 = (zCentre1 + random.randrange(-diameter, diameter)) % 51
   end = []
   ends = []
-  end.append(boundary[b0])
-  end.append(boundary[b1])
-  end.append(RandomZ(1, 51))
+  end.append(boundary[endIndex0][0])
+  end.append(boundary[endIndex0][1])
+  end.append(z0)
   end.append(RandomVoltage())
   ends.append(end)
-  b = RandomBoundaryIndex(boundary)
   end = []
-  end.append(b[0])
-  end.append(b[1])
-  end.append(RandomZ(1, 51))
+  end.append(boundary[endIndex1][0])
+  end.append(boundary[endIndex1][1])
+  end.append(z1)
   end.append(-RandomVoltage())
   ends.append(end)
   ElectrodePairToFile(file, ends)
@@ -179,6 +178,7 @@ def CreateVoltages(fileName, voltages, endCount, endDepth):
   end.append(-RandomVoltage())
   ends.append(end)
   ElectrodePairToFile(file, ends)
+ MakeHole(file, boundary, 400, 5)
  file.write("-1 -1 -1 -1 -1 -1 -1 -1\n")
  print("Voltage file created")
  file.close()
